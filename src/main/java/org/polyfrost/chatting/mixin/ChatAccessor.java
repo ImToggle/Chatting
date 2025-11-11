@@ -1,21 +1,21 @@
 package org.polyfrost.chatting.mixin;
 
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.client.GuiMessage;
+import net.minecraft.client.gui.components.ChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(ChatHud.class)
+@Mixin(ChatComponent.class)
 public interface ChatAccessor {
 
     @Accessor
     List<
-        ChatHudLine
+        GuiMessage
         //#if MC == 11605
-        //$$ <net.minecraft.text.Text>
+        //$$ <net.minecraft.network.chat.Component>
         //#endif
-    > getMessages();
+    > getAllMessages();
 
 }

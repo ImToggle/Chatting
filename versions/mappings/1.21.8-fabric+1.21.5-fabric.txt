@@ -1,2 +1,0 @@
-net.minecraft.client.gui.hud.ChatHudLine content() comp_893()
-net.minecraft.client.gui.hud.MessageIndicator indicatorColor() comp_899()

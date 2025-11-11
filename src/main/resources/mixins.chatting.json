@@ -9,11 +9,7 @@
   "client": [
     "ChatAccessor",
     "ChatLineMixin",
-    "ChatMixin",
-    "MessageHandlerMixin"
+    "ChatMixin"
   ],
-  "verbose": true,
-  "mixins": [
-    "RendererImplMixin"
-  ]
+  "verbose": true
 }

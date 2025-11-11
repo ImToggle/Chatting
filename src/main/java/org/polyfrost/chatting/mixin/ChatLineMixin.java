@@ -1,8 +1,8 @@
 package org.polyfrost.chatting.mixin;
 
-import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.client.GuiMessage;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(ChatHudLine.class)
+@Mixin(GuiMessage.class)
 public class ChatLineMixin {
 }
