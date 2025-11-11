@@ -56,11 +56,11 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     )
     var peekScrolling = true
 
-//    @Keybind(
-//        title = "Peek KeyBind"
-//    )
-//    var chatPeekBind = KeybindHelper.builder().keys(Keys.Z).does {
-//    }
+    @Keybind(
+        title = "Peek KeyBind"
+    )
+    var chatPeekBind = KeybindHelper.builder().keys(Keys.Z).does {
+    }.build()
 
     @RadioButton(
         title = "Peek Mode",
