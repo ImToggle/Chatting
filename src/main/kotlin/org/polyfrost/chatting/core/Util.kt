@@ -33,7 +33,7 @@ var mainChatHud: MainChatHud? = null
 val chatFocused
     get() = currentScreen is ChatScreen
 
-fun getVisibleLength(list: MutableList<McChatVisible>): Int {
+fun getVisibleLength(list: MutableList<McChatLine>): Int {
     var length = 0
     val focused = chatFocused
     list.forEach {
@@ -42,7 +42,7 @@ fun getVisibleLength(list: MutableList<McChatVisible>): Int {
     return length
 }
 
-fun McChatVisible.canRender(focused: Boolean): Boolean {
+fun McChatLine.canRender(focused: Boolean): Boolean {
     val age = mc.gui.guiTicks - this.addedTime
     val opacity = if (focused) {
         1f
@@ -56,7 +56,7 @@ fun clamp(value: Double, min: Double, max: Double): Double {
     return if (value < min) min else min(value, max)
 }
 
-fun String.toChatLine(): McChatLine {
+fun String.toChatLine(): McChatMessage {
     return GuiMessage(
         -1,
         //#if MC >= 1.16.5
@@ -73,17 +73,17 @@ fun String.toChatLine(): McChatLine {
     )
 }
 
-typealias McChatLine =
+typealias McChatMessage =
     GuiMessage
     //#if MC == 1.16.5
     //$$ <net.minecraft.network.chat.Component>
     //#endif
 
-typealias McChatVisible =
+typealias McChatLine =
     //#if MC >= 1.21.1
     GuiMessage.Line
     //#else
-    //$$ McChatLine
+    //$$ McChatMessage
     //#endif
 
 fun <T> visitNode(

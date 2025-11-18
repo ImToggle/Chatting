@@ -1,7 +1,6 @@
 package org.polyfrost.chatting.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.deftu.omnicore.api.client.render.OmniRenderingContext;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,16 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ChatComponent.class)
 public abstract class ChatMixin {
 
-    OmniRenderingContext renderingContext;
-
-    @Inject(
-            //#if MC <= 1.12.2
-            //$$ method = "drawChat",
-            //#else
-            method = "render",
-            //#endif
-            at = @At("HEAD")
-    )
+    @Inject(method = "render", at = @At("HEAD"))
     private void preRender(
             CallbackInfo ci
             //#if MC >= 1.21.1
@@ -37,15 +27,7 @@ public abstract class ChatMixin {
     ) {
     }
 
-    @Inject(
-            //#if MC <= 1.12.2
-            //$$ method = "drawChat",
-            //#else
-            method = "render",
-            //#endif
-            at = @At("TAIL")
-    )
+    @Inject(method = "render", at = @At("TAIL"))
     private void postRender(CallbackInfo ci) {
-        renderingContext.pose().pop();
     }
 }
