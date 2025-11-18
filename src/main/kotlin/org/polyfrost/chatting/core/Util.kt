@@ -3,6 +3,8 @@
 package org.polyfrost.chatting.core
 
 import com.mojang.authlib.GameProfile
+import dev.deftu.omnicore.api.client.chatHud
+import dev.deftu.omnicore.api.client.input.OmniKeyboard
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import dev.deftu.omnicore.api.client.screen.currentScreen
 import dev.deftu.textile.TextStyle
@@ -35,6 +37,20 @@ var peeking = false
 
 val chatFocused
     get() = currentScreen is ChatScreen
+
+fun scrollChat(value: Double) {
+    var amount = clamp(value, -1.0, 1.0)
+    if (!OmniKeyboard.isShiftKeyPressed) {
+        amount *= 7
+    }
+    chatHud?.scrollChat(
+        //#if MC == 1.16.5
+        //$$ amount
+        //#else
+        amount.toInt()
+        //#endif
+    )
+}
 
 fun getVisibleLength(list: MutableList<McChatLine>): Int {
     var length = 0

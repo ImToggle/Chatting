@@ -1,2 +1,3 @@
 net.minecraft.client.gui.components.ChatComponent net.minecraft.client.gui.GuiNewChat
 net.minecraft.client.gui.components.ChatComponent render() drawChat()
+net.minecraft.client.gui.components.ChatComponent scrollChat() scroll()

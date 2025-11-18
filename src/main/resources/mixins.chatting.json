@@ -9,7 +9,8 @@
   "client": [
     "ChatAccessor",
     "ChatLineMixin",
-    "ChatMixin"
+    "ChatMixin",
+    "PeekScrollMixin"
   ],
   "verbose": true
 }
