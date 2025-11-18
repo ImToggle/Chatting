@@ -4,6 +4,7 @@ import org.polyfrost.chatting.ChattingConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.*
 import org.polyfrost.oneconfig.api.hypixel.v1.HypixelUtils
+import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
 import org.polyfrost.polyui.color.rgba
 import org.polyfrost.polyui.input.KeybindHelper
 import org.polyfrost.polyui.input.Keys
@@ -56,11 +57,17 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     )
     var peekScrolling = true
 
-//    @Keybind(
-//        title = "Peek KeyBind"
-//    )
-//    var chatPeekBind = KeybindHelper.builder().keys(Keys.Z).does {
-//    }.build()
+    @Keybind(
+        title = "Peek KeyBind"
+    )
+    var chatPeekBind = KeybindHelper.builder().keys(Keys.Z).does { down ->
+        if (!chatPeek) return@does
+        if (peekMode == 0) {
+            peeking = down
+        } else {
+            if (down) peeking = !peeking
+        }
+    } .build()
 
     @RadioButton(
         title = "Peek Mode",
@@ -323,5 +330,12 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         description = "The type of shadow to render on tooltips."
     )
     var tooltipTextRenderType = 1
+
+    init {
+        addCallback("chatPeek") {
+            if (!chatPeek) peeking = false
+        }
+        KeybindManager.registerKeybind(chatPeekBind)
+    }
 
 }

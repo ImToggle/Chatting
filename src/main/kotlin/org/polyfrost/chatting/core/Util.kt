@@ -30,6 +30,9 @@ var currentSender: GameProfile? = null
 @JvmField
 var mainChatHud: MainChatHud? = null
 
+@JvmField
+var peeking = false
+
 val chatFocused
     get() = currentScreen is ChatScreen
 

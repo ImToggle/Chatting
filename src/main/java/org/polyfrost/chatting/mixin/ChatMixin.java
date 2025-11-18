@@ -104,4 +104,18 @@ public abstract class ChatMixin {
     //$$     return 20 * ModConfig.INSTANCE.getFadeTime();
     //$$ }
     //#endif
+
+    //Chat Peek
+
+    //#if MC > 1.16.5
+    @ModifyVariable(method = "render", at = @At(value = "HEAD", ordinal = 0), argsOnly = true)
+    private boolean setPeek(boolean value) {
+        return value || Util.peeking;
+    }
+    //#else
+    //$$ @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
+    //$$ private boolean setPeek(ChatComponent instance, Operation<Boolean> original) {
+    //$$     return original.call(instance) || Util.peeking;
+    //$$ }
+    //#endif
 }
