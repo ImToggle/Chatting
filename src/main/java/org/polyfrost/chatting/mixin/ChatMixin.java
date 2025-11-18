@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.Util;
+import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,8 +50,9 @@ public abstract class ChatMixin {
     )
     private void setBackgroundColor(Args args) {
         int index = Util.is11605() ? 5 : 4;
-        int alpha = ((int) args.get(index) >>  24) & 0xFF;
-        int color = ModConfig.INSTANCE.getChatBackgroundColor().getArgb() << alpha;
+        PolyColor bgColor = ModConfig.INSTANCE.getChatBackgroundColor();
+        int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
+        int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
     }
 
