@@ -73,6 +73,14 @@ fun String.toChatLine(): McChatMessage {
     )
 }
 
+fun is11605() : Boolean {
+    //#if MC == 1.16.5
+    //$$ return true
+    //#else
+    return false
+    //#endif
+}
+
 typealias McChatMessage =
     GuiMessage
     //#if MC == 1.16.5
