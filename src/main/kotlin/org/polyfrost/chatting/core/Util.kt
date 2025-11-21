@@ -2,7 +2,6 @@
 
 package org.polyfrost.chatting.core
 
-import com.mojang.authlib.GameProfile
 import dev.deftu.omnicore.api.client.chatHud
 import dev.deftu.omnicore.api.client.input.OmniKeyboard
 import dev.deftu.omnicore.api.client.render.OmniResolution
@@ -25,9 +24,6 @@ val editorMessages = mutableListOf(
     "This is a movable chat",
     "§eDrag me around!"
 )
-
-@JvmField
-var currentSender: GameProfile? = null
 
 @JvmField
 var mainChatHud: MainChatHud? = null
@@ -97,6 +93,14 @@ fun is11605() : Boolean {
     //$$ return true
     //#else
     return false
+    //#endif
+}
+
+fun isModern(): Boolean {
+    //#if MC >= 1.16.5
+    return true
+    //#else
+    //$$ return false
     //#endif
 }
 

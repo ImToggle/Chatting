@@ -3,6 +3,7 @@ package org.polyfrost.chatting.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.polyfrost.chatting.core.ModConfig;
+import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +34,16 @@ public abstract class ChatMixin {
             //$$ com.mojang.blaze3d.vertex.PoseStack obj
             //#endif
     ) {
+        //#if MC >= 1.16.5
+        RenderUtil.renderingObj = obj;
+        //#endif
+        RenderUtil.push();
+        RenderUtil.translate(RenderUtil.xOffset, RenderUtil.yOffset);
+    }
+
+    @Inject(method = "render", at = @At("RETURN"))
+    private void postRender(CallbackInfo ci) {
+        RenderUtil.pop();
     }
 
     @ModifyArgs(method = "render",
@@ -54,10 +65,6 @@ public abstract class ChatMixin {
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
-    }
-
-    @Inject(method = "render", at = @At("TAIL"))
-    private void postRender(CallbackInfo ci) {
     }
 
     //Chat Message Fading
