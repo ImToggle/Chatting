@@ -27,6 +27,8 @@ public class ChatMixin_Transformation {
             //#endif
         > trimmedMessages;
 
+    @Shadow private int chatScrollbarPos;
+
     @Inject(method = "render", at = @At("HEAD"))
     private void preRender(
             CallbackInfo ci
@@ -41,9 +43,9 @@ public class ChatMixin_Transformation {
         //#if MC >= 1.16.5
         RenderUtil.renderingObj = obj;
         //#endif
-        RenderUtil.recalculate(this.trimmedMessages);
+        RenderUtil.recalculate(this.trimmedMessages, this.chatScrollbarPos);
         RenderUtil.push();
-        RenderUtil.translate(RenderUtil.xOffset, RenderUtil.yOffset);
+        RenderUtil.translate(RenderUtil.offsetX, RenderUtil.offsetY);
     }
 
     @Inject(method = "render", at = @At("RETURN"))
@@ -54,42 +56,42 @@ public class ChatMixin_Transformation {
     //#if MC >= 1.21.1
     @ModifyVariable(method = "screenToChatX", at = @At("HEAD"), argsOnly = true)
     private double translateMouseX(double value) {
-        return value - RenderUtil.xOffset;
+        return value - RenderUtil.offsetX;
     }
 
     @ModifyVariable(method = "screenToChatY", at = @At("HEAD"), argsOnly = true)
     private double translateMouseY(double value) {
-        return value - RenderUtil.yOffset;
+        return value - RenderUtil.offsetY;
     }
     //#elseif MC == 1.16.5
     //$$ @ModifyVariable(method = "handleChatQueueClicked", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     //$$ private double translateMouseX(double value) {
-    //$$     return value - RenderUtil.xOffset;
+    //$$     return value - RenderUtil.offsetX;
     //$$ }
     //$$
     //$$ @ModifyVariable(method = "handleChatQueueClicked", at = @At("HEAD"), ordinal = 1, argsOnly = true)
     //$$ private double translateMouseY(double value) {
-    //$$     return value - RenderUtil.yOffset;
+    //$$     return value - RenderUtil.offsetY;
     //$$ }
     //$$
     //$$ @ModifyVariable(method = "getClickedComponentStyleAt", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     //$$ private double translateMouseX1(double value) {
-    //$$     return value - RenderUtil.xOffset;
+    //$$     return value - RenderUtil.offsetX;
     //$$ }
     //$$
     //$$ @ModifyVariable(method = "getClickedComponentStyleAt", at = @At("HEAD"), ordinal = 1, argsOnly = true)
     //$$ private double translateMouseY1(double value) {
-    //$$     return value - RenderUtil.yOffset;
+    //$$     return value - RenderUtil.offsetY;
     //$$ }
     //#else
     //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     //$$ private int translateMouseX(int value) {
-    //$$     return value - RenderUtil.xOffset;
+    //$$     return value - RenderUtil.offsetX;
     //$$ }
     //$$
     //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 1, argsOnly = true)
     //$$ private int translateMouseY(int value) {
-    //$$     return value - RenderUtil.yOffset;
+    //$$     return value - RenderUtil.offsetY;
     //$$ }
     //#endif
 

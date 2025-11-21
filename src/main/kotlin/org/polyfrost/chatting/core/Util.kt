@@ -11,6 +11,7 @@ import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.network.chat.Component
 import org.polyfrost.chatting.hud.MainChatHud
+import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import kotlin.math.min
 
 val mcScale
@@ -30,7 +31,7 @@ var mainChatHud: MainChatHud? = null
 var peeking = false
 
 val chatFocused
-    get() = currentScreen is ChatScreen
+    get() = currentScreen is ChatScreen || peeking || HudManager.isEditing || !ModConfig.fade
 
 fun scrollChat(value: Double) {
     var amount = clamp(value, -1.0, 1.0)

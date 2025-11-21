@@ -6,49 +6,81 @@ import dev.deftu.omnicore.api.client.options.OmniChatSettings
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.pow
 
 @JvmField
 var renderingObj: Any? = null
 
 @JvmField
-var chatX = 0f
-
-@JvmField
-var chatY = 0f
-
-@JvmField
-var xOffset = 0
-
-@JvmField
-var yOffset = 0
-
-@JvmField
 var length = 0
 
-fun recalculate(list: MutableList<McChatLine>) {
-    length = getVisibleLength(list)
-    xOffset = (chatX / mcScale).toInt()
-    yOffset = (chatY / mcScale).toInt() - getVanillaChatY()
+@JvmField
+var maxLength = 0
+
+@JvmField
+var lineHeight = 0
+
+@JvmField
+var offsetX = 0
+
+@JvmField
+var offsetY = 0
+
+fun recalculate(list: MutableList<McChatLine>, scrollPos: Int) {
+    val chatHud = mainChatHud ?: return
+    lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
+    val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
+    maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
+    length = getVisibleLength(list, scrollPos)
+    offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
+    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY()
+    val chatScale = OmniChatSettings.chatScale.toFloat() * mcScale
+    chatHud.get().width = floor(40 + 280 * OmniChatSettings.chatWidth).toFloat() + getExtraWidth()
+    chatHud.get().height = lineHeight * length * chatScale
+}
+
+fun getExtraWidth(): Int {
+    //#if MC >= 1.21.1
+    return 12
+    //#elseif MC >= 1.12.2
+    //$$ return 6
+    //#else
+    //$$ return 4
+    //#endif
+}
+
+fun getVanillaChatX(): Float {
+    //#if MC == 1.16.5
+    //$$ return 2 * (1 - OmniChatSettings.chatScale).toFloat()
+    //#elseif MC >= 1.12.2
+    return 0f
+    //#else
+    //$$ return 2f
+    //#endif
 }
 
 fun getVanillaChatY(): Int {
     val startY = OmniResolution.scaledHeight - 28 - if (isModern()) 12 else 0
-    return startY - length * (9 * (1 + OmniChatSettings.chatLineSpacing) * OmniChatSettings.chatScale).toInt()
+    return startY - (length * lineHeight * OmniChatSettings.chatScale).toInt()
 }
 
-fun getVisibleLength(list: MutableList<McChatLine>): Int {
+fun getVisibleLength(list: MutableList<McChatLine>, scrollPos: Int): Int {
+    if (list.isEmpty()) return 0
     var length = 0
     val focused = chatFocused
-    list.forEach {
-        if (it.canRender(focused)) length++
+    var i = min(list.size - scrollPos, maxLength) - 1
+    while (i >= 0) {
+        if (list[i + scrollPos].canRender(focused)) length++
+        i--
     }
     return length
 }
 
 fun McChatLine.canRender(focused: Boolean): Boolean {
     val age = mc.gui.guiTicks - this.addedTime
-    val opacity = if (focused || !ModConfig.fade) {
+    val opacity = if (focused) {
         1f
     } else {
         clamp((1 - age.toDouble() / ceil(20.0 * ModConfig.fadeTime)) * 10, 0.0, 1.0).pow(2).toFloat()
