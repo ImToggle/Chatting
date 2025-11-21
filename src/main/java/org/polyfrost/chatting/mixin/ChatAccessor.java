@@ -12,10 +12,14 @@ public interface ChatAccessor {
 
     @Accessor
     List<
-        GuiMessage
-        //#if MC == 11605
-        //$$ <net.minecraft.network.chat.Component>
+        //#if MC >= 1.21.1
+        GuiMessage.Line
+        //#else
+        //$$ GuiMessage
+            //#if MC == 1.16.5
+            //$$ <net.minecraft.network.chat.Component>
+            //#endif
         //#endif
-    > getAllMessages();
+    > getTrimmedMessages();
 
 }

@@ -1,16 +1,31 @@
 package org.polyfrost.chatting.mixin.chat;
 
 import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.polyfrost.chatting.core.RenderUtil;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.List;
 
 @Mixin(ChatComponent.class)
 public class ChatMixin_Transformation {
+
+    @Shadow @Final private List<
+            //#if MC >= 1.21.1
+            GuiMessage.Line
+            //#else
+            //$$ GuiMessage
+                //#if MC == 1.16.5
+                //$$ <net.minecraft.network.chat.Component>
+                //#endif
+            //#endif
+        > trimmedMessages;
 
     @Inject(method = "render", at = @At("HEAD"))
     private void preRender(
@@ -26,6 +41,7 @@ public class ChatMixin_Transformation {
         //#if MC >= 1.16.5
         RenderUtil.renderingObj = obj;
         //#endif
+        RenderUtil.recalculate(this.trimmedMessages);
         RenderUtil.push();
         RenderUtil.translate(RenderUtil.xOffset, RenderUtil.yOffset);
     }
@@ -37,13 +53,13 @@ public class ChatMixin_Transformation {
 
     //#if MC >= 1.21.1
     @ModifyVariable(method = "screenToChatX", at = @At("HEAD"), argsOnly = true)
-    private double translateMouseX(double d) {
-        return d - RenderUtil.xOffset;
+    private double translateMouseX(double value) {
+        return value - RenderUtil.xOffset;
     }
 
     @ModifyVariable(method = "screenToChatY", at = @At("HEAD"), argsOnly = true)
-    private double translateMouseY(double d) {
-        return d - RenderUtil.yOffset;
+    private double translateMouseY(double value) {
+        return value - RenderUtil.yOffset;
     }
     //#elseif MC == 1.16.5
     //$$ @ModifyVariable(method = "handleChatQueueClicked", at = @At("HEAD"), ordinal = 0, argsOnly = true)
@@ -68,12 +84,12 @@ public class ChatMixin_Transformation {
     //#else
     //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 0, argsOnly = true)
     //$$ private int translateMouseX(int value) {
-    //$$     return value - (int) RenderUtil.xOffset;
+    //$$     return value - RenderUtil.xOffset;
     //$$ }
     //$$
     //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 1, argsOnly = true)
     //$$ private int translateMouseY(int value) {
-    //$$     return value - (int) RenderUtil.yOffset;
+    //$$     return value - RenderUtil.yOffset;
     //$$ }
     //#endif
 

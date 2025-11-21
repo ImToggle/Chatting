@@ -11,9 +11,7 @@ import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.network.chat.Component
 import org.polyfrost.chatting.hud.MainChatHud
-import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.min
-import kotlin.math.pow
 
 val mcScale
     get() = OmniResolution.scaleFactor.toFloat()
@@ -46,25 +44,6 @@ fun scrollChat(value: Double) {
         amount.toInt()
         //#endif
     )
-}
-
-fun getVisibleLength(list: MutableList<McChatLine>): Int {
-    var length = 0
-    val focused = chatFocused
-    list.forEach {
-        if (it.canRender(focused)) length++
-    }
-    return length
-}
-
-fun McChatLine.canRender(focused: Boolean): Boolean {
-    val age = mc.gui.guiTicks - this.addedTime
-    val opacity = if (focused) {
-        1f
-    } else {
-        clamp((1 - age.toDouble() / 200.0) * 10, 0.0, 1.0).pow(2).toFloat()
-    }
-    return opacity > 1.0E-5F
 }
 
 fun clamp(value: Double, min: Double, max: Double): Double {
