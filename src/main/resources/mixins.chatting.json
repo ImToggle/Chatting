@@ -9,8 +9,9 @@
   "client": [
     "ChatAccessor",
     "ChatLineMixin",
-    "ChatMixin",
-    "PeekScrollMixin"
+    "PeekScrollMixin",
+    "chat.ChatMixin",
+    "chat.ChatMixin_Transformation"
   ],
   "verbose": true
 }
