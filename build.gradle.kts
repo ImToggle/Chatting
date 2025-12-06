@@ -16,7 +16,7 @@ plugins {
 
 toolkitLoomHelper {
     useOneConfig {
-        version = "1.0.0-alpha.177"
+        version = "1.0.0-alpha.180"
         loaderVersion = "1.1.0-alpha.53"
         usePolyMixin = true
         polyMixinVersion = "0.8.4+build.6"
