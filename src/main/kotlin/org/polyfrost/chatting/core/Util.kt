@@ -4,6 +4,7 @@ package org.polyfrost.chatting.core
 
 import dev.deftu.omnicore.api.client.chatHud
 import dev.deftu.omnicore.api.client.input.OmniKeyboard
+import dev.deftu.omnicore.api.client.input.OmniMouse
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import dev.deftu.omnicore.api.client.screen.currentScreen
 import dev.deftu.textile.TextStyle
@@ -11,8 +12,11 @@ import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.network.chat.Component
 import org.polyfrost.chatting.hud.MainChatHud
+import org.polyfrost.chatting.mixin.ChatAccessor
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
+import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.min
+import kotlin.math.roundToInt
 
 val mcScale
     get() = OmniResolution.scaleFactor.toFloat()
@@ -30,6 +34,9 @@ var mainChatHud: MainChatHud? = null
 @JvmField
 var peeking = false
 
+@JvmField
+var gettingIndex = false
+
 val chatFocused
     get() = currentScreen is ChatScreen || peeking || HudManager.isEditing || !ModConfig.fade
 
@@ -45,6 +52,19 @@ fun scrollChat(value: Double) {
         amount.toInt()
         //#endif
     )
+}
+
+fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY) {
+    gettingIndex = true
+    val accessor = mc.gui.chat as ChatAccessor
+    //#if MC >= 1.21.1
+    McChat.selectedIndex = accessor.getIndexAt(x, y)
+    //#elseif MC == 1.16.5
+    accessor.getStyleAt(x, y)
+    //#else
+    //$$ accessor.getComponentAt(x.roundToInt(), y.roundToInt())
+    //#endif
+    gettingIndex = false
 }
 
 fun clamp(value: Double, min: Double, max: Double): Double {

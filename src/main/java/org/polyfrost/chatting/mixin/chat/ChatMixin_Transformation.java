@@ -95,4 +95,22 @@ public class ChatMixin_Transformation {
     //$$ }
     //#endif
 
+    //#if MC <= 1.16.5
+        //#if MC <= 1.12.2
+        //$$ @ModifyVariable(method = "getChatComponent", at = @At(value = "STORE"), ordinal = 6)
+        //#else
+        //$$ @ModifyVariable(method = "getClickedComponentStyleAt", at = @At(value = "STORE"), ordinal = 1)
+        //#endif
+    //$$ private int selectedIndex(int value) {
+    //$$     if (org.polyfrost.chatting.core.Util.gettingIndex) {
+    //$$         if (value >= 0 && value < this.trimmedMessages.size()) {
+    //$$             org.polyfrost.chatting.core.McChat.selectedIndex = value;
+    //$$         } else {
+    //$$             org.polyfrost.chatting.core.McChat.selectedIndex = -1;
+    //$$         }
+    //$$     }
+    //$$     return value;
+    //$$ }
+    //#endif
+
 }
