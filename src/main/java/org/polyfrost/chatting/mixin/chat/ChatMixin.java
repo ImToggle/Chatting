@@ -42,6 +42,7 @@ public abstract class ChatMixin {
     private void setBackgroundColor(Args args) {
         RenderUtil.currentIndex--;
         int index = Util.is11605() ? 5 : 4;
+        System.out.println(RenderUtil.currentIndex + ", " + McChat.selectedIndex);
         PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? ModConfig.INSTANCE.getHoveredChatBackgroundColor() : ModConfig.INSTANCE.getChatBackgroundColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);

@@ -8,12 +8,12 @@ object McChat {
     @JvmField
     var selectedIndex = -1
 
-    private var editorMessages = mutableListOf(
+    private val editorMessages = mutableListOf(
         "§b§lChatting",
         "",
         "This is a movable chat",
         "§eDrag me around!"
-    ).map { it.toChatLine() }
+    ).reversed().map { it.toChatLine() }
 
     private var editorLines = emptyList<McChatLine<*>>()
 

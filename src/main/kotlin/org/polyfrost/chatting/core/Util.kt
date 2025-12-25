@@ -58,9 +58,9 @@ fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaled
     gettingIndex = true
     val accessor = mc.gui.chat as ChatAccessor
     //#if MC >= 1.21.1
-    McChat.selectedIndex = accessor.getIndexAt(x, y)
+    McChat.selectedIndex = accessor.getIndexAt(accessor.getChatX(x), accessor.getChatY(y))
     //#elseif MC == 1.16.5
-    accessor.getStyleAt(x, y)
+    //$$ accessor.getStyleAt(x, y)
     //#else
     //$$ accessor.getComponentAt(x.roundToInt(), y.roundToInt())
     //#endif

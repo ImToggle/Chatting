@@ -1,6 +1,7 @@
 package org.polyfrost.chatting.hud
 
 import org.polyfrost.chatting.core.mainChatHud
+import org.polyfrost.polyui.color.Color
 import org.polyfrost.polyui.component.Drawable
 import org.polyfrost.polyui.component.impl.Block
 import org.polyfrost.polyui.unit.Vec2
@@ -20,7 +21,11 @@ class MainChatHud : SimpleChatHud("mainChat.yml", "Main Chat") {
         return 0f by 500f
     }
 
+    override fun hasBackground(): Boolean {
+        return false
+    }
+
     override fun createDrawable(): Drawable {
-        return Block(size = 1f by 1f)
+        return Block(size = 1f by 1f, color = Color.TRANSPARENT)
     }
 }

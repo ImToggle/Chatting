@@ -30,6 +30,12 @@ public interface ChatAccessor {
     //#if MC >= 1.21.1
     @Invoker("getMessageLineIndexAt")
     int getIndexAt(double x, double y);
+
+    @Invoker("screenToChatX")
+    double getChatX(double x);
+
+    @Invoker("screenToChatY")
+    double getChatY(double y);
     //#endif
 
     //#if MC >= 1.16.5
