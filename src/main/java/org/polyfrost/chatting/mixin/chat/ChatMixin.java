@@ -1,7 +1,9 @@
 package org.polyfrost.chatting.mixin.chat;
 
 import net.minecraft.client.gui.components.ChatComponent;
+import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.ModConfig;
+import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,8 +39,9 @@ public abstract class ChatMixin {
             )
     )
     private void setBackgroundColor(Args args) {
+        RenderUtil.currentIndex--;
         int index = Util.is11605() ? 5 : 4;
-        PolyColor bgColor = ModConfig.INSTANCE.getChatBackgroundColor();
+        PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? ModConfig.INSTANCE.getHoveredChatBackgroundColor() : ModConfig.INSTANCE.getChatBackgroundColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);

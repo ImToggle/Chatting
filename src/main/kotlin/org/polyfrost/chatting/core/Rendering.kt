@@ -28,6 +28,9 @@ var offsetX = 0
 @JvmField
 var offsetY = 0
 
+@JvmField
+var currentIndex = -1
+
 fun recalculate(list: MutableList<McChatLine>, scrollPos: Int) {
     val chatHud = mainChatHud ?: return
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
@@ -40,6 +43,7 @@ fun recalculate(list: MutableList<McChatLine>, scrollPos: Int) {
     chatHud.get().width = (getWidth() + getExtraWidth()).toFloat()
     chatHud.get().height = lineHeight * length * chatScale
     getSelectedIndex()
+    currentIndex = min(list.size - scrollPos, maxLength)
 }
 
 fun getWidth(): Int {
@@ -105,8 +109,8 @@ fun push() {
         //$$ guiGraphics.pose().pushPose()
         //#endif
     //#elseif MC == 1.16.5
-    val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
-    poseStack.pushPose()
+    //$$ val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
+    //$$ poseStack.pushPose()
     //#else
     //$$ net.minecraft.client.renderer.GlStateManager.pushMatrix()
     //#endif
@@ -137,8 +141,8 @@ fun pop() {
         //$$ guiGraphics.pose().popPose()
         //#endif
     //#elseif MC == 1.16.5
-    val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
-    poseStack.popPose()
+    //$$ val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
+    //$$ poseStack.popPose()
     //#else
     //$$ net.minecraft.client.renderer.GlStateManager.popMatrix()
     //#endif
