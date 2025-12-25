@@ -71,7 +71,7 @@ fun clamp(value: Double, min: Double, max: Double): Double {
     return if (value < min) min else min(value, max)
 }
 
-fun String.toChatLine(): McChatMessage {
+fun String.toChatLine(): McChatMessage<Component> {
     return GuiMessage(
         -1,
         //#if MC >= 1.16.5
@@ -86,6 +86,32 @@ fun String.toChatLine(): McChatMessage {
         //$$ -1
         //#endif
     )
+}
+
+fun McChatMessage<Component>.toLines(width: Int): List<McChatLine<*>> {
+    var width = width
+    //#if MC >= 1.21.1
+    this.tag?.icon?.let { icon ->
+        width -= icon.width + 4 + 2
+    }
+    //#endif
+    //#if MC >= 1.16.5
+    val list = net.minecraft.client.gui.components.ComponentRenderUtils.wrapComponents(this.content(), width, mc.font)
+    return list.map { it ->
+        McChatLine<net.minecraft.util.FormattedCharSequence>(this.addedTime, it,
+            //#if MC >= 1.21.1
+            this.tag, it == list.last()
+            //#else
+            //$$ this.id
+            //#endif
+        )
+    }
+    //#else
+    //$$ val list = net.minecraft.client.gui.GuiUtilRenderComponents.splitText(chatComponent, width, mc.fontRenderer, false, false)
+    //$$ return list.map { it ->
+    //$$     McChatLine<Any>(this.updatedCounter, it, this.chatLineID)
+    //$$ }
+    //#endif
 }
 
 fun is11605() : Boolean {
@@ -104,17 +130,17 @@ fun isModern(): Boolean {
     //#endif
 }
 
-typealias McChatMessage =
+typealias McChatMessage<T> =
     GuiMessage
     //#if MC == 1.16.5
-    //$$ <net.minecraft.network.chat.Component>
+    //$$ <T>
     //#endif
 
-typealias McChatLine =
+typealias McChatLine<T> =
     //#if MC >= 1.21.1
     GuiMessage.Line
     //#else
-    //$$ McChatMessage
+    //$$ McChatMessage<T>
     //#endif
 
 fun <T> visitNode(

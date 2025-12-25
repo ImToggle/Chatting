@@ -19,7 +19,7 @@ public interface ChatAccessor {
         //#else
         //$$ GuiMessage
             //#if MC == 1.16.5
-            //$$ <net.minecraft.network.chat.Component>
+            //$$ <?>
             //#endif
         //#endif
     > getTrimmedMessages();

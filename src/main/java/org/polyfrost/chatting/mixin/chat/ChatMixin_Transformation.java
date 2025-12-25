@@ -3,7 +3,9 @@ package org.polyfrost.chatting.mixin.chat;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
+import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.RenderUtil;
+import org.polyfrost.oneconfig.api.hud.v1.HudManager;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -22,7 +24,7 @@ public class ChatMixin_Transformation {
             //#else
             //$$ GuiMessage
                 //#if MC == 1.16.5
-                //$$ <net.minecraft.network.chat.Component>
+                //$$ <?>
                 //#endif
             //#endif
         > trimmedMessages;
@@ -43,7 +45,7 @@ public class ChatMixin_Transformation {
         //#if MC >= 1.16.5
         RenderUtil.renderingObj = obj;
         //#endif
-        RenderUtil.recalculate(this.trimmedMessages, this.chatScrollbarPos);
+        RenderUtil.recalculate(HudManager.isEditing() ? McChat.INSTANCE.getEditorLines() : this.trimmedMessages, this.chatScrollbarPos);
         RenderUtil.push();
         RenderUtil.translate(RenderUtil.offsetX, RenderUtil.offsetY);
     }

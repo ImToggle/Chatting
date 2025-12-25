@@ -31,7 +31,7 @@ var offsetY = 0
 @JvmField
 var currentIndex = -1
 
-fun recalculate(list: MutableList<McChatLine>, scrollPos: Int) {
+fun recalculate(list: MutableList<McChatLine<*>>, scrollPos: Int) {
     val chatHud = mainChatHud ?: return
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
     val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
@@ -74,7 +74,7 @@ fun getVanillaChatY(): Int {
     return OmniResolution.scaledHeight - 28 - if (isModern()) 12 else 0
 }
 
-fun getVisibleLength(list: MutableList<McChatLine>, scrollPos: Int): Int {
+fun getVisibleLength(list: MutableList<McChatLine<*>>, scrollPos: Int): Int {
     if (list.isEmpty()) return 0
     var length = 0
     val focused = chatFocused
@@ -86,7 +86,7 @@ fun getVisibleLength(list: MutableList<McChatLine>, scrollPos: Int): Int {
     return length
 }
 
-fun McChatLine.canRender(focused: Boolean): Boolean {
+fun McChatLine<*>.canRender(focused: Boolean): Boolean {
     val age = mc.gui.guiTicks - this.addedTime
     val opacity = if (focused) {
         1f

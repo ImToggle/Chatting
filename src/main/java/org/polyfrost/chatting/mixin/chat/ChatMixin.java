@@ -5,6 +5,7 @@ import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
+import org.polyfrost.oneconfig.api.hud.v1.HudManager;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -97,12 +98,12 @@ public abstract class ChatMixin {
     //#if MC > 1.16.5
     @ModifyVariable(method = "render", at = @At(value = "HEAD", ordinal = 0), argsOnly = true)
     private boolean setPeek(boolean value) {
-        return value || Util.peeking;
+        return value || Util.peeking || HudManager.isEditing();
     }
     //#else
     //$$ @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
     //$$ private boolean setPeek(ChatComponent instance, Operation<Boolean> original) {
-    //$$     return original.call(instance) || Util.peeking;
+    //$$     return original.call(instance) || Util.peeking || HudManager.isEditing();
     //$$ }
     //#endif
 }
