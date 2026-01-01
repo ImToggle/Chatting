@@ -26,7 +26,12 @@ public abstract class ChatMixin {
 
     //Chat Appearance
 
-    @ModifyArgs(method = "render",
+    @ModifyArgs(
+            //#if MC >= 1.21.8
+            method = "method_71992",
+            //#else
+            //$$ method = "render",
+            //#endif
             at = @At(
                     value = "INVOKE",
                     //#if MC >= 1.21.1
