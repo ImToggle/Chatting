@@ -38,9 +38,9 @@ fun recalculate(list: MutableList<McChatLine<*>>, scrollPos: Int) {
     maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
     length = getVisibleLength(list, scrollPos)
     offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
-    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * OmniChatSettings.chatScale).toInt()
+    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale).toInt()
     val chatScale = OmniChatSettings.chatScale.toFloat() * mcScale
-    chatHud.get().width = (getWidth() + getExtraWidth()).toFloat()
+    chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale
     chatHud.get().height = lineHeight * length * chatScale
     getSelectedIndex()
     currentIndex = min(list.size - scrollPos, maxLength)
@@ -62,7 +62,7 @@ fun getExtraWidth(): Int {
 
 fun getVanillaChatX(): Float {
     //#if MC == 1.16.5
-    //$$ return 2 * (1 - OmniChatSettings.chatScale).toFloat()
+    //$$ return 2 * (1 - chatScale).toFloat()
     //#elseif MC >= 1.12.2
     return 0f
     //#else

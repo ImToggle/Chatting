@@ -47,12 +47,27 @@ public abstract class ChatMixin {
     private void setBackgroundColor(Args args) {
         RenderUtil.currentIndex--;
         int index = Util.is11605() ? 5 : 4;
-        System.out.println(RenderUtil.currentIndex + ", " + McChat.selectedIndex);
         PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? ModConfig.INSTANCE.getHoveredChatBackgroundColor() : ModConfig.INSTANCE.getChatBackgroundColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
     }
+
+    //#if MC > 1.12.2
+    @Inject(method = "getScale", at = @At("HEAD"), cancellable = true)
+    private static void modifyScale(CallbackInfoReturnable<Double> cir) {
+        if (Util.mainChatHud != null) {
+            cir.setReturnValue(cir.getReturnValueD() * Util.mainChatHud.get().getScaleX());
+        }
+    }
+    //#else
+    //$$ @Inject(method = "getChatScale", at = @At("HEAD"), cancellable = true)
+    //$$ private void modifyScale(CallbackInfoReturnable<Float> cir) {
+    //$$     if (Util.mainChatHud != null) {
+    //$$         cir.setReturnValue(cir.getReturnValueF() * Util.mainChatHud.get().getScaleX());
+    //$$     }
+    //$$ }
+    //#endif
 
     //Chat Message Fading
 

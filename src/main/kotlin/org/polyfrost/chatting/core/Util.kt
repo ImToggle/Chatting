@@ -5,6 +5,7 @@ package org.polyfrost.chatting.core
 import dev.deftu.omnicore.api.client.chatHud
 import dev.deftu.omnicore.api.client.input.OmniKeyboard
 import dev.deftu.omnicore.api.client.input.OmniMouse
+import dev.deftu.omnicore.api.client.options.OmniChatSettings
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import dev.deftu.omnicore.api.client.screen.currentScreen
 import dev.deftu.textile.TextStyle
@@ -16,10 +17,12 @@ import org.polyfrost.chatting.mixin.ChatAccessor
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.min
-import kotlin.math.roundToInt
 
 val mcScale
     get() = OmniResolution.scaleFactor.toFloat()
+
+val chatScale
+    get() = OmniChatSettings.chatScale * (mainChatHud?.get()?.scaleX ?: 1f)
 
 val editorMessages = mutableListOf(
     "§b§lChatting",
@@ -62,7 +65,7 @@ fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaled
     //#elseif MC == 1.16.5
     //$$ accessor.getStyleAt(x, y)
     //#else
-    //$$ accessor.getComponentAt(x.roundToInt(), y.roundToInt())
+    //$$ accessor.getComponentAt(x.toInt(), y.toInt())
     //#endif
     gettingIndex = false
 }

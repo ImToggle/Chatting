@@ -20,11 +20,11 @@ object McChat {
     private var lastWidth = -1
 
     fun getEditorLines(): List<McChatLine<*>> {
-        val width = floor(getWidth().toDouble() / OmniChatSettings.chatScale).toInt()
+        val width = floor(getWidth().toDouble() / chatScale).toInt()
         if (width != lastWidth) {
             lastWidth = width
             editorLines = editorMessages.flatMap {
-                it.toLines(width)
+                it.toLines(width).reversed()
             }
         }
         return editorLines
