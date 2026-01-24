@@ -5,7 +5,6 @@ import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
-import org.polyfrost.oneconfig.api.hud.v1.HudManager;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -36,8 +35,9 @@ public abstract class ChatMixin {
     )
     private void setBackgroundColor(Args args) {
         RenderUtil.currentIndex--;
+        if (Util.mainChatHud == null) return;
         int index = 4;
-        PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? ModConfig.INSTANCE.getHoveredChatBackgroundColor() : ModConfig.INSTANCE.getChatBackgroundColor();
+        PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? Util.mainChatHud.getBgColor_hovered() : Util.mainChatHud.getBgColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
@@ -76,6 +76,6 @@ public abstract class ChatMixin {
 
     @ModifyVariable(method = "render", at = @At(value = "HEAD", ordinal = 0), argsOnly = true)
     private boolean setPeek(boolean value) {
-        return value || Util.peeking || HudManager.isEditing();
+        return Util.getChatFocused();
     }
 }

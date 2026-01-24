@@ -18,18 +18,6 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     )
     var textRenderType = 1
 
-    @Color(
-        title = "Chat Background Color", category = "General",
-        description = "The color of the chat background."
-    )
-    var chatBackgroundColor = rgba(0, 0, 0, 0.5f)
-
-    @Color(
-        title = "Hover Message Background Color", category = "General",
-        description = "The color of the chat background when hovering over a message."
-    )
-    var hoveredChatBackgroundColor = rgba(80, 80, 80, 0.5f)
-
     @Checkbox(
         title = "Message Fade"
     )

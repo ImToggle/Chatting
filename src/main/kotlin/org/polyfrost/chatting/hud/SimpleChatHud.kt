@@ -12,6 +12,11 @@ abstract class SimpleChatHud(id: String, title: String) : Hud<Drawable>(id, titl
     )
     var bgColor = rgba(0, 0, 0, 0.5f)
 
+    @Color(
+        title = "Hovered Background Color"
+    )
+    var bgColor_hovered = rgba(80, 80, 80, 0.5f)
+
     abstract fun createDrawable(): Drawable
 
     override fun create(): Drawable {
