@@ -1,6 +1,6 @@
 package org.polyfrost.chatting.core
 
-import dev.deftu.omnicore.api.client.options.OmniChatSettings
+import net.minecraft.client.GuiMessage
 import kotlin.math.floor
 
 object McChat {
@@ -15,11 +15,11 @@ object McChat {
         "§eDrag me around!"
     ).reversed().map { it.toChatLine() }
 
-    private var editorLines = emptyList<McChatLine<*>>()
+    private var editorLines = emptyList<GuiMessage.Line>()
 
     private var lastWidth = -1
 
-    fun getEditorLines(): List<McChatLine<*>> {
+    fun getEditorLines(): List<GuiMessage.Line> {
         val width = floor(getWidth().toDouble() / chatScale).toInt()
         if (width != lastWidth) {
             lastWidth = width

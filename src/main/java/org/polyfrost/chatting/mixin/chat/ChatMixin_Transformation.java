@@ -2,6 +2,7 @@ package org.polyfrost.chatting.mixin.chat;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.RenderUtil;
@@ -18,41 +19,20 @@ import java.util.List;
 @Mixin(ChatComponent.class)
 public class ChatMixin_Transformation {
 
-    @Shadow @Final private List<
-            //#if MC >= 1.21.1
-            GuiMessage.Line
-            //#else
-            //$$ GuiMessage
-                //#if MC == 1.16.5
-                //$$ <?>
-                //#endif
-            //#endif
-        > trimmedMessages;
+    @Shadow @Final private List<GuiMessage.Line> trimmedMessages;
 
     @Shadow private int chatScrollbarPos;
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void preRender(
-            CallbackInfo ci
-            //#if MC >= 1.21.1
-            , @Local(argsOnly = true)
-            net.minecraft.client.gui.GuiGraphics obj
-            //#elseif MC >= 1.16.5
-            //$$ , @Local(argsOnly = true)
-            //$$ com.mojang.blaze3d.vertex.PoseStack obj
-            //#endif
-    ) {
-        //#if MC >= 1.16.5
-        RenderUtil.renderingObj = obj;
-        //#endif
+    private void preRender(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         RenderUtil.recalculate(HudManager.isEditing() ? McChat.INSTANCE.getEditorLines() : this.trimmedMessages, this.chatScrollbarPos);
-        RenderUtil.push();
-        RenderUtil.translate(RenderUtil.offsetX, RenderUtil.offsetY);
+        RenderUtil.push(guiGraphics);
+        RenderUtil.translate(guiGraphics, RenderUtil.offsetX, RenderUtil.offsetY);
     }
 
     @Inject(method = "render", at = @At("RETURN"))
-    private void postRender(CallbackInfo ci) {
-        RenderUtil.pop();
+    private void postRender(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
+        RenderUtil.pop(guiGraphics);
     }
 
     //#if MC >= 1.21.1

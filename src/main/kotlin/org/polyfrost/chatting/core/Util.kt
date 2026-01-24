@@ -48,25 +48,13 @@ fun scrollChat(value: Double) {
     if (!OmniKeyboard.isShiftKeyPressed) {
         amount *= 7
     }
-    chatHud?.scrollChat(
-        //#if MC == 1.16.5
-        //$$ amount
-        //#else
-        amount.toInt()
-        //#endif
-    )
+    chatHud?.scrollChat(amount.toInt())
 }
 
 fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY) {
     gettingIndex = true
     val accessor = mc.gui.chat as ChatAccessor
-    //#if MC >= 1.21.1
     McChat.selectedIndex = accessor.getIndexAt(accessor.getChatX(x), accessor.getChatY(y))
-    //#elseif MC == 1.16.5
-    //$$ accessor.getStyleAt(x, y)
-    //#else
-    //$$ accessor.getComponentAt(x.toInt(), y.toInt())
-    //#endif
     gettingIndex = false
 }
 
@@ -74,77 +62,20 @@ fun clamp(value: Double, min: Double, max: Double): Double {
     return if (value < min) min else min(value, max)
 }
 
-fun String.toChatLine(): McChatMessage<Component> {
-    return GuiMessage(
-        -1,
-        //#if MC >= 1.16.5
-        Component.literal(this),
-        //#else
-        //$$ net.minecraft.util.text.TextComponentString(this),
-        //#endif
-        //#if MC > 1.16.5
-        null,
-        null
-        //#else
-        //$$ -1
-        //#endif
-    )
+fun String.toChatLine(): GuiMessage {
+    return GuiMessage(-1, Component.literal(this), null, null)
 }
 
-fun McChatMessage<Component>.toLines(width: Int): List<McChatLine<*>> {
+fun GuiMessage.toLines(width: Int): List<GuiMessage.Line> {
     var width = width
-    //#if MC >= 1.21.1
     this.tag?.icon?.let { icon ->
         width -= icon.width + 4 + 2
     }
-    //#endif
-    //#if MC >= 1.16.5
     val list = net.minecraft.client.gui.components.ComponentRenderUtils.wrapComponents(this.content(), width, mc.font)
     return list.map { it ->
-        McChatLine<net.minecraft.util.FormattedCharSequence>(this.addedTime, it,
-            //#if MC >= 1.21.1
-            this.tag, it == list.last()
-            //#else
-            //$$ this.id
-            //#endif
-        )
+        GuiMessage.Line(this.addedTime, it, this.tag, it == list.last())
     }
-    //#else
-    //$$ val list = net.minecraft.client.gui.GuiUtilRenderComponents.splitText(chatComponent, width, mc.fontRenderer, false, false)
-    //$$ return list.map { it ->
-    //$$     McChatLine<Any>(this.updatedCounter, it, this.chatLineID)
-    //$$ }
-    //#endif
 }
-
-fun is11605() : Boolean {
-    //#if MC == 1.16.5
-    //$$ return true
-    //#else
-    return false
-    //#endif
-}
-
-fun isModern(): Boolean {
-    //#if MC >= 1.16.5
-    return true
-    //#else
-    //$$ return false
-    //#endif
-}
-
-typealias McChatMessage<T> =
-    GuiMessage
-    //#if MC == 1.16.5
-    //$$ <T>
-    //#endif
-
-typealias McChatLine<T> =
-    //#if MC >= 1.21.1
-    GuiMessage.Line
-    //#else
-    //$$ McChatMessage<T>
-    //#endif
 
 fun <T> visitNode(
     text: dev.deftu.textile.Text,

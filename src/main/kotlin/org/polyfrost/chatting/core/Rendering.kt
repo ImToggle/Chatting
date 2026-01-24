@@ -4,14 +4,13 @@ package org.polyfrost.chatting.core
 
 import dev.deftu.omnicore.api.client.options.OmniChatSettings
 import dev.deftu.omnicore.api.client.render.OmniResolution
+import net.minecraft.client.GuiMessage
+import net.minecraft.client.gui.GuiGraphics
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min
 import kotlin.math.pow
-
-@JvmField
-var renderingObj: Any? = null
 
 @JvmField
 var length = 0
@@ -31,7 +30,7 @@ var offsetY = 0
 @JvmField
 var currentIndex = -1
 
-fun recalculate(list: MutableList<McChatLine<*>>, scrollPos: Int) {
+fun recalculate(list: MutableList<GuiMessage.Line>, scrollPos: Int) {
     val chatHud = mainChatHud ?: return
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
     val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
@@ -51,30 +50,18 @@ fun getWidth(): Int {
 }
 
 fun getExtraWidth(): Int {
-    //#if MC >= 1.21.1
     return 12
-    //#elseif MC >= 1.12.2
-    //$$ return 6
-    //#else
-    //$$ return 4
-    //#endif
 }
 
 fun getVanillaChatX(): Float {
-    //#if MC == 1.16.5
-    //$$ return 2 * (1 - chatScale).toFloat()
-    //#elseif MC >= 1.12.2
     return 0f
-    //#else
-    //$$ return 2f
-    //#endif
 }
 
 fun getVanillaChatY(): Int {
-    return OmniResolution.scaledHeight - 28 - if (isModern()) 12 else 0
+    return OmniResolution.scaledHeight - 40
 }
 
-fun getVisibleLength(list: MutableList<McChatLine<*>>, scrollPos: Int): Int {
+fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
     if (list.isEmpty()) return 0
     var length = 0
     val focused = chatFocused
@@ -86,7 +73,7 @@ fun getVisibleLength(list: MutableList<McChatLine<*>>, scrollPos: Int): Int {
     return length
 }
 
-fun McChatLine<*>.canRender(focused: Boolean): Boolean {
+fun GuiMessage.Line.canRender(focused: Boolean): Boolean {
     val age = mc.gui.guiTicks - this.addedTime
     val opacity = if (focused) {
         1f
@@ -100,50 +87,27 @@ fun McChatLine<*>.canRender(focused: Boolean): Boolean {
     //#endif
 }
 
-fun push() {
-    //#if MC >= 1.21.1
-    val guiGraphics = renderingObj as net.minecraft.client.gui.GuiGraphics? ?: return
-        //#if MC >= 1.21.8
-        guiGraphics.pose().pushMatrix()
-        //#else
-        //$$ guiGraphics.pose().pushPose()
-        //#endif
-    //#elseif MC == 1.16.5
-    //$$ val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
-    //$$ poseStack.pushPose()
+fun GuiGraphics.push() {
+    //#if MC >= 1.21.8
+    this.pose().pushMatrix()
     //#else
-    //$$ net.minecraft.client.renderer.GlStateManager.pushMatrix()
+    //$$ this.pose().pushPose()
     //#endif
 }
 
-fun translate(x: Float, y: Float) {
+fun GuiGraphics.translate(x: Float, y: Float) {
     if (x == 0f && y == 0f) return
-    //#if MC >= 1.21.1
-    val guiGraphics = renderingObj as net.minecraft.client.gui.GuiGraphics? ?: return
-        //#if MC >= 1.21.8
-        guiGraphics.pose().translate(x, y)
-        //#else
-        //$$ guiGraphics.pose().translate(x, y, 0f)
-        //#endif
-    //#elseif MC == 1.16.5
-    //$$ com.mojang.blaze3d.systems.RenderSystem.translatef(x, y, 0f)
+    //#if MC >= 1.21.8
+    this.pose().translate(x, y)
     //#else
-    //$$ net.minecraft.client.renderer.GlStateManager.translate(x, y, 0f)
+    //$$ this.pose().translate(x, y, 0f)
     //#endif
 }
 
-fun pop() {
-    //#if MC >= 1.21.1
-        val guiGraphics = renderingObj as net.minecraft.client.gui.GuiGraphics? ?: return
-        //#if MC >= 1.21.8
-        guiGraphics.pose().popMatrix()
-        //#else
-        //$$ guiGraphics.pose().popPose()
-        //#endif
-    //#elseif MC == 1.16.5
-    //$$ val poseStack = renderingObj as com.mojang.blaze3d.vertex.PoseStack? ?: return
-    //$$ poseStack.popPose()
+fun GuiGraphics.pop() {
+    //#if MC >= 1.21.8
+    this.pose().popMatrix()
     //#else
-    //$$ net.minecraft.client.renderer.GlStateManager.popMatrix()
+    //$$ this.pose().popPose()
     //#endif
 }

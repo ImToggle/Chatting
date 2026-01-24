@@ -13,21 +13,11 @@ import java.util.List;
 public interface ChatAccessor {
 
     @Accessor
-    List<
-        //#if MC >= 1.21.1
-        GuiMessage.Line
-        //#else
-        //$$ GuiMessage
-            //#if MC == 1.16.5
-            //$$ <?>
-            //#endif
-        //#endif
-    > getTrimmedMessages();
+    List<GuiMessage.Line> getTrimmedMessages();
 
     @Accessor
     int getChatScrollbarPos();
 
-    //#if MC >= 1.21.1
     @Invoker("getMessageLineIndexAt")
     int getIndexAt(double x, double y);
 
@@ -36,15 +26,8 @@ public interface ChatAccessor {
 
     @Invoker("screenToChatY")
     double getChatY(double y);
-    //#endif
 
-    //#if MC >= 1.16.5
     @Invoker("getClickedComponentStyleAt")
     Style getStyleAt(double x, double y);
-    //#endif
 
-    //#if MC <= 1.12.2
-    //$$ @Invoker("getChatComponent")
-    //$$ net.minecraft.util.text.ITextComponent getComponentAt(int mouseX, int mouseY);
-    //#endif
 }
