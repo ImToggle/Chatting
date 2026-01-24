@@ -1,2 +1,0 @@
-net.minecraft.network.chat.Component literal() nullToEmpty()
-net.minecraft.client.GuiMessage content() getMessage()

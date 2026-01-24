@@ -35,7 +35,6 @@ public class ChatMixin_Transformation {
         RenderUtil.pop(guiGraphics);
     }
 
-    //#if MC >= 1.21.1
     @ModifyVariable(method = "screenToChatX", at = @At("HEAD"), argsOnly = true)
     private double translateMouseX(double value) {
         return value - RenderUtil.offsetX;
@@ -45,37 +44,6 @@ public class ChatMixin_Transformation {
     private double translateMouseY(double value) {
         return value - RenderUtil.offsetY;
     }
-    //#elseif MC == 1.16.5
-    //$$ @ModifyVariable(method = "handleChatQueueClicked", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    //$$ private double translateMouseX(double value) {
-    //$$     return value - RenderUtil.offsetX;
-    //$$ }
-    //$$
-    //$$ @ModifyVariable(method = "handleChatQueueClicked", at = @At("HEAD"), ordinal = 1, argsOnly = true)
-    //$$ private double translateMouseY(double value) {
-    //$$     return value - RenderUtil.offsetY;
-    //$$ }
-    //$$
-    //$$ @ModifyVariable(method = "getClickedComponentStyleAt", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    //$$ private double translateMouseX1(double value) {
-    //$$     return value - RenderUtil.offsetX;
-    //$$ }
-    //$$
-    //$$ @ModifyVariable(method = "getClickedComponentStyleAt", at = @At("HEAD"), ordinal = 1, argsOnly = true)
-    //$$ private double translateMouseY1(double value) {
-    //$$     return value - RenderUtil.offsetY;
-    //$$ }
-    //#else
-    //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    //$$ private int translateMouseX(int value) {
-    //$$     return value - RenderUtil.offsetX;
-    //$$ }
-    //$$
-    //$$ @ModifyVariable(method = "getChatComponent", at = @At("HEAD"), ordinal = 1, argsOnly = true)
-    //$$ private int translateMouseY(int value) {
-    //$$     return value - RenderUtil.offsetY;
-    //$$ }
-    //#endif
 
     //#if MC <= 1.16.5
         //#if MC <= 1.12.2
