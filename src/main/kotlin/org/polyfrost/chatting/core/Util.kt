@@ -37,7 +37,7 @@ var peeking = false
 var gettingIndex = false
 
 val chatFocused
-    get() = currentScreen is ChatScreen || peeking || HudManager.isEditing || !ModConfig.fade
+    get() = currentScreen is ChatScreen || peeking || HudManager.isEditing
 
 fun scrollChat(value: Double) {
     var amount = clamp(value, -1.0, 1.0)

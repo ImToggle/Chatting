@@ -11,6 +11,7 @@
     "ChatLineMixin",
     "PeekScrollMixin",
     "chat.ChatMixin",
+    "chat.ChatMixin_Input",
     "chat.ChatMixin_Replacement",
     "chat.ChatMixin_Transformation"
   ],

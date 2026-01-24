@@ -19,7 +19,7 @@ class MainChatHud : SimpleChatHud("mainChat.yml", "Main Chat") {
     }
 
     override fun defaultPosition(): Vec2 {
-        return 0f by 0f
+        return 0 by 1080 - 40
     }
 
     override fun hasBackground(): Boolean {

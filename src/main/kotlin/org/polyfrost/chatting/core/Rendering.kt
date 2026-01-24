@@ -65,11 +65,15 @@ fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
     var length = 0
     val focused = chatFocused
     var i = min(list.size - scrollPos, maxLength) - 1
-    while (i >= 0) {
-        if (list[i + scrollPos].canRender(focused)) length++
-        i--
+    return if (ModConfig.fade) {
+        while (i >= 0) {
+            if (list[i + scrollPos].canRender(focused)) length++
+            i--
+        }
+        length
+    } else {
+        i + 1
     }
-    return length
 }
 
 fun GuiMessage.Line.canRender(focused: Boolean): Boolean {
