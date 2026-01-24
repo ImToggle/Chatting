@@ -42,6 +42,12 @@ var gettingIndex = false
 val chatFocused
     get() = currentScreen is ChatScreen || peeking || HudManager.isEditing
 
+private val COLOR_MAP: Map<Int, Char> by lazy {
+    ChatFormatting.entries
+        .filter { it.isColor }
+        .associate { it.color!! to it.char }
+}
+
 fun scrollChat(value: Double) {
     var amount = clamp(value, -1.0, 1.0)
     if (!OmniKeyboard.isShiftKeyPressed) {
@@ -76,52 +82,57 @@ fun GuiMessage.toLines(width: Int): List<GuiMessage.Line> {
     }
 }
 
-// todo: optimize this method
-fun Component.asString(): String {
-    val stringBuilder = StringBuilder()
-    val formattings = charArrayOf('l', 'o', 'n', 'm', 'k')
+fun Component.asString(): String = buildString {
+    var lastBits = 0
+    var lastColor: Int? = null
 
-    fun Style.getProperties() = booleanArrayOf(isBold, isItalic, isUnderlined, isStrikethrough, isObfuscated)
-
-    fun Style.colorChar(): Char? {
-        val colorValue = this.color?.value ?: return null
-        return ChatFormatting.entries.firstOrNull { it.isColor && it.color == colorValue }?.char
-    }
-
-    fun appendAll(color: Char?, properties: BooleanArray) {
-        color?.let { stringBuilder.append("§$it") }
-        properties.forEachIndexed { i, active -> if (active) stringBuilder.append("§${formattings[i]}") }
-    }
-
-    var lastProperties = BooleanArray(5) { false }
-    var lastColor: Char? = null
-
-    this.visit({ style, text ->
+    this@asString.visit({ style, text ->
         if (text.isEmpty()) return@visit Optional.empty()
-        val properties = style.getProperties()
-        val color = style.colorChar()
-        val colorChanged = color != lastColor
-        val lostFormatting = lastProperties.indices.any { lastProperties[it] && !properties[it] }
-        if (lostFormatting || (lastColor != null && color == null)) {
-            if (color == null) stringBuilder.append("§r")
-            appendAll(color, properties)
+
+        val currentBits = style.toBits()
+        val currentColor = style.color?.value
+
+        val lostBits = (lastBits and currentBits.inv()) != 0
+        val colorChanged = currentColor != lastColor
+
+        if (lostBits || colorChanged) {
+            appendFullStyle(currentBits, currentColor)
+        } else {
+            val newBits = currentBits and lastBits.inv()
+            appendBits(newBits)
         }
-        else {
-            if (colorChanged) {
-                appendAll(color, properties)
-            } else {
-                properties.forEachIndexed { i, active ->
-                    if (active && !lastProperties[i]) stringBuilder.append("§${formattings[i]}")
-                }
-            }
-        }
-        stringBuilder.append(text)
-        lastProperties = properties
-        lastColor = color
+
+        append(text)
+
+        lastBits = currentBits
+        lastColor = currentColor
+
         return@visit Optional.empty<Any>()
     }, Style.EMPTY)
+}
 
-    return stringBuilder.toString()
+private fun Style.toBits(): Int {
+    var bits = 0
+    if (isBold) bits = bits or 0x01
+    if (isItalic) bits = bits or 0x02
+    if (isUnderlined) bits = bits or 0x04
+    if (isStrikethrough) bits = bits or 0x08
+    if (isObfuscated) bits = bits or 0x10
+    return bits
+}
+
+private fun StringBuilder.appendBits(bits: Int) {
+    if (bits and 0x01 != 0) append("§l")
+    if (bits and 0x02 != 0) append("§o")
+    if (bits and 0x04 != 0) append("§n")
+    if (bits and 0x08 != 0) append("§m")
+    if (bits and 0x10 != 0) append("§k")
+}
+
+private fun StringBuilder.appendFullStyle(bits: Int, colorValue: Int?) {
+    val colorChar = colorValue?.let { COLOR_MAP[it] } ?: 'r';
+    append("§$colorChar")
+    appendBits(bits)
 }
 
 fun <T> visitNode(
