@@ -2,8 +2,12 @@ package org.polyfrost.chatting.hook;
 
 public interface ChatLineHook {
 
-    void chatting$setFullMessage(String fullMessage);
+    void chatting$setLeft(int chattingHashCode);
 
-    String chatting$getFullMessage();
+    int chatting$getLeft();
+
+    void chatting$setRight(int chattingHashCode);
+
+    int chatting$getRight();
 
 }

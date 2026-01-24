@@ -27,21 +27,20 @@ var offsetX = 0
 @JvmField
 var offsetY = 0
 
-@JvmField
-var currentIndex = -1
+var messagesLength = 0
 
 fun recalculate(list: MutableList<GuiMessage.Line>, scrollPos: Int) {
     val chatHud = mainChatHud ?: return
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
     val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
     maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
+    messagesLength = list.size
     length = getVisibleLength(list, scrollPos)
     offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
     offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale * hudScale).toInt()
     chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale.toFloat() * mcScale
     chatHud.get().height = lineHeight * length * chatScale.toFloat() * mcScale
     getSelectedIndex()
-    currentIndex = min(list.size - scrollPos, maxLength)
 }
 
 fun getWidth(): Int {
@@ -64,7 +63,7 @@ fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
     if (list.isEmpty()) return 0
     var length = 0
     val focused = chatFocused
-    var i = min(list.size - scrollPos, maxLength) - 1
+    var i = min(messagesLength - scrollPos, maxLength) - 1
     return if (ModConfig.fade) {
         while (i >= 0) {
             if (list[i + scrollPos].canRender(focused)) length++

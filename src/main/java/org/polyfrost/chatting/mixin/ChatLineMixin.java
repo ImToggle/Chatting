@@ -8,15 +8,27 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(GuiMessage.Line.class)
 public class ChatLineMixin implements ChatLineHook {
 
-    @Unique String fullMessage = "";
+    @Unique int left = 0;
+
+    @Unique int right = 0;
 
     @Override
-    public void chatting$setFullMessage(String fullMessage) {
-        this.fullMessage =  fullMessage;
+    public void chatting$setLeft(int left) {
+        this.left = left;
     }
 
     @Override
-    public String chatting$getFullMessage() {
-        return this.fullMessage;
+    public int chatting$getLeft() {
+        return this.left;
+    }
+
+    @Override
+    public void chatting$setRight(int right) {
+        this.right = right;
+    }
+
+    @Override
+    public int chatting$getRight() {
+        return this.right;
     }
 }

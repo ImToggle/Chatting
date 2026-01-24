@@ -3,18 +3,21 @@ package org.polyfrost.chatting.mixin.chat;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.util.FormattedCharSequence;
 import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.ModConfig;
-import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.chatting.hook.ChatLineHook;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import java.util.List;
 
 //#if MC <= 1.21.5
 //$$ import com.llamalad7.mixinextras.injector.wrapoperation.*;
@@ -25,6 +28,8 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 public abstract class ChatMixin {
 
     // Chat Appearance
+
+    @Shadow private int chatScrollbarPos;
 
     @ModifyArgs(
             //#if MC >= 1.21.8
@@ -38,11 +43,17 @@ public abstract class ChatMixin {
                     ordinal = 0
             )
     )
-    private void setBackgroundColor(Args args) {
-        RenderUtil.currentIndex--;
+    private void setBackgroundColor(Args args, @Local(ordinal =
+            //#if MC >= 1.21.8
+            6
+            //#else
+            //$$ 13
+            //#endif
+            , argsOnly = true) int lineIndex) {
+        lineIndex += chatScrollbarPos;
         if (Util.mainChatHud == null) return;
         int index = 4;
-        PolyColor bgColor = RenderUtil.currentIndex == McChat.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : Util.mainChatHud.getBgColor();
+        PolyColor bgColor = lineIndex == McChat.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : McChat.selectedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_selected() : Util.mainChatHud.getBgColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
@@ -84,18 +95,35 @@ public abstract class ChatMixin {
         return Util.getChatFocused();
     }
 
-    // Chat Copying
+    // Chat Interaction
 
     @Unique String fullMessage = "";
 
-    @Inject(method = "addMessageToDisplayQueue", at = @At("HEAD"))
-    private void test(GuiMessage guiMessage, CallbackInfo ci) {
+    @Unique int size = -1;
+
+    @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
+    private void preAdd(GuiMessage guiMessage, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
         fullMessage = Util.asString(guiMessage.content());
+        size = list.size();
+        McChat.INSTANCE.shiftSelection(list.size());
     }
 
     @ModifyArgs(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V"))
-    private void injectFullMessage(Args args, @Local(argsOnly = true) GuiMessage guiMessage) {
+    private void onAdd(Args args, @Local(ordinal = 1) int index) {
         GuiMessage.Line chatLine = args.get(1);
-        ((ChatLineHook) (Object) chatLine).chatting$setFullMessage(fullMessage);
+        ChatLineHook hook = (ChatLineHook) (Object) chatLine;
+        assert hook != null;
+        hook.chatting$setLeft(index + 1 - size);
+        hook.chatting$setRight(index);
+    }
+
+    @Inject(method = "clearMessages", at = @At("HEAD"))
+    private void onClear(boolean bl, CallbackInfo ci) {
+        McChat.INSTANCE.clearSelection();
+    }
+
+    @Inject(method = "refreshTrimmedMessages", at = @At("HEAD"))
+    private void onRefresh(CallbackInfo ci) {
+        McChat.INSTANCE.clearSelection();
     }
 }

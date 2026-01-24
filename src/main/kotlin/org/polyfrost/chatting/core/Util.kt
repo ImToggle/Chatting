@@ -8,12 +8,13 @@ import dev.deftu.omnicore.api.client.input.OmniMouse
 import dev.deftu.omnicore.api.client.options.OmniChatSettings
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import dev.deftu.omnicore.api.client.screen.currentScreen
-import dev.deftu.textile.TextStyle
 import net.minecraft.ChatFormatting
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
+import net.minecraft.util.FormattedCharSequence
+import org.polyfrost.chatting.hook.ChatLineHook
 import org.polyfrost.chatting.hud.MainChatHud
 import org.polyfrost.chatting.mixin.chat.ChatAccessor
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
@@ -47,6 +48,12 @@ private val COLOR_MAP: Map<Int, Char> by lazy {
         .filter { it.isColor }
         .associate { it.color!! to it.char }
 }
+
+fun getAllMessages(): List<GuiMessage.Line> {
+    return (mc.gui.chat as ChatAccessor).trimmedMessages
+}
+
+fun GuiMessage.Line.asHook() = this as Any as ChatLineHook
 
 fun scrollChat(value: Double) {
     var amount = clamp(value, -1.0, 1.0)
@@ -111,6 +118,32 @@ fun Component.asString(): String = buildString {
     }, Style.EMPTY)
 }
 
+fun FormattedCharSequence.asString(): String = buildString {
+    var lastBits = 0
+    var lastColor: Int? = null
+
+    this@asString.accept { _, style, codepoint ->
+        val currentBits = style.toBits()
+        val currentColor = style.color?.value
+
+        val lostBits = (lastBits and currentBits.inv()) != 0
+        val colorChanged = currentColor != lastColor
+
+        if (lostBits || colorChanged) {
+            appendFullStyle(currentBits, currentColor)
+        } else {
+            val newBits = currentBits and lastBits.inv()
+            appendBits(newBits)
+        }
+
+        append(Character.toChars(codepoint))
+
+        lastBits = currentBits
+        lastColor = currentColor
+        true
+    }
+}
+
 private fun Style.toBits(): Int {
     var bits = 0
     if (isBold) bits = bits or 0x01
@@ -133,32 +166,4 @@ private fun StringBuilder.appendFullStyle(bits: Int, colorValue: Int?) {
     val colorChar = colorValue?.let { COLOR_MAP[it] } ?: 'r';
     append("§$colorChar")
     appendBits(bits)
-}
-
-fun <T> visitNode(
-    text: dev.deftu.textile.Text,
-    inheritedStyle: TextStyle = TextStyle.EMPTY,
-    visitor: (node: dev.deftu.textile.Text, content: String, style: TextStyle) -> T?
-): T? {
-    val style = text.style.inherited(inheritedStyle)
-    val hit = text.content.visit({ content, innerStyle ->
-        if (content.isEmpty()) {
-            return@visit null
-        }
-
-        visitor(text, content, style)
-    }, style)
-
-    if (hit != null) {
-        return hit
-    }
-
-    for (sibling in text.siblings) {
-        val siblingHit = visitNode(sibling, style, visitor)
-        if (siblingHit != null) {
-            return siblingHit
-        }
-    }
-
-    return null
 }
