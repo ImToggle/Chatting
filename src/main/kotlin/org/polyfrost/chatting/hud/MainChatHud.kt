@@ -9,8 +9,9 @@ import org.polyfrost.polyui.unit.by
 
 class MainChatHud : SimpleChatHud("mainChat.yml", "Main Chat") {
 
-    init {
-        mainChatHud = this
+    override fun setup() {
+        super.setup()
+        if (isReal) mainChatHud = this
     }
 
     override fun multipleInstancesAllowed(): Boolean {
@@ -18,7 +19,7 @@ class MainChatHud : SimpleChatHud("mainChat.yml", "Main Chat") {
     }
 
     override fun defaultPosition(): Vec2 {
-        return 0f by 500f
+        return 0f by 0f
     }
 
     override fun hasBackground(): Boolean {

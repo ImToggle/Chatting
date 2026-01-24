@@ -37,10 +37,9 @@ fun recalculate(list: MutableList<GuiMessage.Line>, scrollPos: Int) {
     maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
     length = getVisibleLength(list, scrollPos)
     offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
-    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale).toInt()
-    val chatScale = OmniChatSettings.chatScale.toFloat() * mcScale
-    chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale
-    chatHud.get().height = lineHeight * length * chatScale
+    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale * hudScale).toInt()
+    chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale.toFloat() * mcScale
+    chatHud.get().height = lineHeight * length * chatScale.toFloat() * mcScale
     getSelectedIndex()
     currentIndex = min(list.size - scrollPos, maxLength)
 }
@@ -95,6 +94,14 @@ fun GuiGraphics.push() {
     //#endif
 }
 
+fun GuiGraphics.pop() {
+    //#if MC >= 1.21.8
+    this.pose().popMatrix()
+    //#else
+    //$$ this.pose().popPose()
+    //#endif
+}
+
 fun GuiGraphics.translate(x: Float, y: Float) {
     if (x == 0f && y == 0f) return
     //#if MC >= 1.21.8
@@ -104,10 +111,11 @@ fun GuiGraphics.translate(x: Float, y: Float) {
     //#endif
 }
 
-fun GuiGraphics.pop() {
+fun GuiGraphics.scale(x: Float, y: Float) {
+    if (x == 1f && y == 1f) return
     //#if MC >= 1.21.8
-    this.pose().popMatrix()
+    this.pose().scale(x, y)
     //#else
-    //$$ this.pose().popPose()
+    //$$ this.pose().scale(x, y, 1f)
     //#endif
 }

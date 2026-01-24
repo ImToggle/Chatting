@@ -43,13 +43,6 @@ public abstract class ChatMixin {
         args.set(index, color);
     }
 
-    @Inject(method = "getScale", at = @At("HEAD"), cancellable = true)
-    private static void modifyScale(CallbackInfoReturnable<Double> cir) {
-        if (Util.mainChatHud != null) {
-            cir.setReturnValue(cir.getReturnValueD() * Util.mainChatHud.get().getScaleX());
-        }
-    }
-
     //Chat Message Fading
 
     //#if MC <= 1.21.5

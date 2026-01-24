@@ -21,15 +21,11 @@ import kotlin.math.min
 val mcScale
     get() = OmniResolution.scaleFactor.toFloat()
 
-val chatScale
-    get() = OmniChatSettings.chatScale * (mainChatHud?.get()?.scaleX ?: 1f)
+val hudScale
+    get() = mainChatHud?.get()?.scaleX ?: 1f
 
-val editorMessages = mutableListOf(
-    "§b§lChatting",
-    "",
-    "This is a movable chat",
-    "§eDrag me around!"
-)
+val chatScale
+    get() = OmniChatSettings.chatScale
 
 @JvmField
 var mainChatHud: MainChatHud? = null
