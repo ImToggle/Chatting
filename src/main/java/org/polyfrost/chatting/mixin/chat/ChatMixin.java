@@ -1,13 +1,18 @@
 package org.polyfrost.chatting.mixin.chat;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
 import org.polyfrost.chatting.core.McChat;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
+import org.polyfrost.chatting.hook.ChatLineHook;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
@@ -19,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(ChatComponent.class)
 public abstract class ChatMixin {
 
-    //Chat Appearance
+    // Chat Appearance
 
     @ModifyArgs(
             //#if MC >= 1.21.8
@@ -37,13 +42,13 @@ public abstract class ChatMixin {
         RenderUtil.currentIndex--;
         if (Util.mainChatHud == null) return;
         int index = 4;
-        PolyColor bgColor = RenderUtil.currentIndex == McChat.selectedIndex ? Util.mainChatHud.getBgColor_hovered() : Util.mainChatHud.getBgColor();
+        PolyColor bgColor = RenderUtil.currentIndex == McChat.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : Util.mainChatHud.getBgColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
     }
 
-    //Chat Message Fading
+    // Chat Message Fading
 
     //#if MC <= 1.21.5
     //$$ @ModifyConstant(method = "render", constant = @Constant(intValue = 200))
@@ -72,10 +77,25 @@ public abstract class ChatMixin {
         return 20 * ModConfig.INSTANCE.getFadeTime();
     }
 
-    //Chat Peek
+    // Chat Peek
 
     @ModifyVariable(method = "render", at = @At(value = "HEAD", ordinal = 0), argsOnly = true)
     private boolean setPeek(boolean value) {
         return Util.getChatFocused();
+    }
+
+    // Chat Copying
+
+    @Unique String fullMessage = "";
+
+    @Inject(method = "addMessageToDisplayQueue", at = @At("HEAD"))
+    private void test(GuiMessage guiMessage, CallbackInfo ci) {
+        fullMessage = Util.asString(guiMessage.content());
+    }
+
+    @ModifyArgs(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V"))
+    private void injectFullMessage(Args args, @Local(argsOnly = true) GuiMessage guiMessage) {
+        GuiMessage.Line chatLine = args.get(1);
+        ((ChatLineHook) (Object) chatLine).chatting$setFullMessage(fullMessage);
     }
 }

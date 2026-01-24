@@ -9,13 +9,16 @@ import dev.deftu.omnicore.api.client.options.OmniChatSettings
 import dev.deftu.omnicore.api.client.render.OmniResolution
 import dev.deftu.omnicore.api.client.screen.currentScreen
 import dev.deftu.textile.TextStyle
+import net.minecraft.ChatFormatting
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.Style
 import org.polyfrost.chatting.hud.MainChatHud
-import org.polyfrost.chatting.mixin.ChatAccessor
+import org.polyfrost.chatting.mixin.chat.ChatAccessor
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
+import java.util.Optional
 import kotlin.math.min
 
 val mcScale
@@ -50,7 +53,7 @@ fun scrollChat(value: Double) {
 fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY) {
     gettingIndex = true
     val accessor = mc.gui.chat as ChatAccessor
-    McChat.selectedIndex = accessor.getIndexAt(accessor.getChatX(x), accessor.getChatY(y))
+    McChat.hoveredIndex = accessor.getIndexAt(accessor.getChatX(x), accessor.getChatY(y))
     gettingIndex = false
 }
 
@@ -71,6 +74,54 @@ fun GuiMessage.toLines(width: Int): List<GuiMessage.Line> {
     return list.map { it ->
         GuiMessage.Line(this.addedTime, it, this.tag, it == list.last())
     }
+}
+
+// todo: optimize this method
+fun Component.asString(): String {
+    val stringBuilder = StringBuilder()
+    val formattings = charArrayOf('l', 'o', 'n', 'm', 'k')
+
+    fun Style.getProperties() = booleanArrayOf(isBold, isItalic, isUnderlined, isStrikethrough, isObfuscated)
+
+    fun Style.colorChar(): Char? {
+        val colorValue = this.color?.value ?: return null
+        return ChatFormatting.entries.firstOrNull { it.isColor && it.color == colorValue }?.char
+    }
+
+    fun appendAll(color: Char?, properties: BooleanArray) {
+        color?.let { stringBuilder.append("§$it") }
+        properties.forEachIndexed { i, active -> if (active) stringBuilder.append("§${formattings[i]}") }
+    }
+
+    var lastProperties = BooleanArray(5) { false }
+    var lastColor: Char? = null
+
+    this.visit({ style, text ->
+        if (text.isEmpty()) return@visit Optional.empty()
+        val properties = style.getProperties()
+        val color = style.colorChar()
+        val colorChanged = color != lastColor
+        val lostFormatting = lastProperties.indices.any { lastProperties[it] && !properties[it] }
+        if (lostFormatting || (lastColor != null && color == null)) {
+            if (color == null) stringBuilder.append("§r")
+            appendAll(color, properties)
+        }
+        else {
+            if (colorChanged) {
+                appendAll(color, properties)
+            } else {
+                properties.forEachIndexed { i, active ->
+                    if (active && !lastProperties[i]) stringBuilder.append("§${formattings[i]}")
+                }
+            }
+        }
+        stringBuilder.append(text)
+        lastProperties = properties
+        lastColor = color
+        return@visit Optional.empty<Any>()
+    }, Style.EMPTY)
+
+    return stringBuilder.toString()
 }
 
 fun <T> visitNode(

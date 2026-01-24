@@ -1,4 +1,4 @@
-package org.polyfrost.chatting.mixin;
+package org.polyfrost.chatting.mixin.chat;
 
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
@@ -15,9 +15,6 @@ public interface ChatAccessor {
     @Accessor
     List<GuiMessage.Line> getTrimmedMessages();
 
-    @Accessor
-    int getChatScrollbarPos();
-
     @Invoker("getMessageLineIndexAt")
     int getIndexAt(double x, double y);
 
@@ -26,8 +23,5 @@ public interface ChatAccessor {
 
     @Invoker("screenToChatY")
     double getChatY(double y);
-
-    @Invoker("getClickedComponentStyleAt")
-    Style getStyleAt(double x, double y);
 
 }

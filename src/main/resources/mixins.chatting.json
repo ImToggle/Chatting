@@ -7,7 +7,7 @@
     "maxShiftBy": 5
   },
   "client": [
-    "ChatAccessor",
+    "chat.ChatAccessor",
     "ChatLineMixin",
     "PeekScrollMixin",
     "chat.ChatMixin",
