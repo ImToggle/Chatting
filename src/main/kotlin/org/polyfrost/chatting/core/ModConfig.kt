@@ -5,6 +5,7 @@ import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.*
 import org.polyfrost.oneconfig.api.hypixel.v1.HypixelUtils
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
+import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import org.polyfrost.polyui.color.rgba
 import org.polyfrost.polyui.input.KeybindHelper
 import org.polyfrost.polyui.input.Keys
@@ -62,11 +63,13 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     )
     var chatPeekBind = KeybindHelper.builder().keys(Keys.Z).does { down ->
         if (!chatPeek) return@does
+        val last = peeking
         if (peekMode == 0) {
             peeking = down
         } else {
             if (down) peeking = !peeking
         }
+        if (peeking != last && !peeking) mc.gui.chat.resetChatScroll()
     } .build()
 
     @RadioButton(
