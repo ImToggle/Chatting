@@ -97,14 +97,14 @@ public abstract class ChatMixin {
 
     // Chat Interaction
 
-    @Unique String fullMessage = "";
+    @Unique int parent = -1;
 
     @Unique int size = -1;
 
     @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
     private void preAdd(GuiMessage guiMessage, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
-        fullMessage = Util.asString(guiMessage.content());
         size = list.size();
+        parent = guiMessage.hashCode();
         ChatHandler.INSTANCE.shiftSelection(list.size());
     }
 
@@ -115,6 +115,7 @@ public abstract class ChatMixin {
         assert hook != null;
         hook.chatting$setLeft(index + 1 - size);
         hook.chatting$setRight(index);
+        hook.chatting$setParent(parent);
     }
 
     @Inject(method = "clearMessages", at = @At("HEAD"))

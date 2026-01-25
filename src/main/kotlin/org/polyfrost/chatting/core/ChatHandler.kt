@@ -1,12 +1,14 @@
 package org.polyfrost.chatting.core
 
 import dev.deftu.clipboard.Clipboard
+import dev.deftu.eventbus.SubscribeEvent
+import dev.deftu.omnicore.api.client.events.ScreenEvent
 import dev.deftu.omnicore.api.client.input.OmniKeyboard
+import dev.deftu.omnicore.api.client.input.OmniKeys
+import dev.deftu.omnicore.api.eventBus
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
-import org.polyfrost.oneconfig.api.ui.v1.Notifications
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import kotlin.math.floor
 
@@ -33,47 +35,64 @@ object ChatHandler {
     private var lastWidth = -1
 
     fun initialize() {
+        eventBus.register(this)
         ScreenEvents.AFTER_INIT.register { _, screen, _, _ ->
             if (screen !is ChatScreen) return@register
             ScreenEvents.Remove { screen ->
                 clearSelection()
             }
-            ScreenMouseEvents.afterMouseRelease(screen).register { _, context, _ ->
-                val isHovered = hoveredIndex != -1
-                if (!isHovered ) {
-                    clearSelection()
-                    return@register true
-                }
-                when (context.buttonInfo.button) {
-                    0 -> {
-                        if (!OmniKeyboard.isCtrlKeyPressed) selectedIndexes.clear()
-                        when {
-                            OmniKeyboard.isAltKeyPressed -> {
-                                val hook = getAllMessages()[hoveredIndex].asHook()
-                                selectedIndexes.addAll(hoveredIndex + hook.`chatting$getLeft`()..hoveredIndex + hook.`chatting$getRight`())
-                            }
-                            OmniKeyboard.isShiftKeyPressed -> {
-                                val start = minOf(lastSelected, hoveredIndex)
-                                val end = maxOf(lastSelected, hoveredIndex)
-                                selectedIndexes.addAll(start..end)
-                            }
-                            else -> selectedIndexes.add(hoveredIndex)
-                        }
-                        lastSelected = hoveredIndex
-                        selectedIndexes = selectedIndexes.sortedDescending().toMutableSet()
-                    }
-                    1 -> copyMessage(
-                        if (selectedIndexes.contains(hoveredIndex)) {
-                            selectedIndexes
-                        } else {
-                            selectedIndexes.clear()
-                            mutableSetOf(hoveredIndex)
-                        }
-                    )
-                }
-                return@register true
-            }
         }
+    }
+
+    @SubscribeEvent
+    fun onKeyRelease(event: ScreenEvent.KeyRelease.Post) {
+        if (event.screen !is ChatScreen) return
+        if (hoveredIndex == -1) return
+        when (event.key) {
+            OmniKeys.KEY_DELETE -> removeMessage(selectedIndexes)
+            OmniKeys.KEY_C -> if (event.modifiers.isCtrl) copyMessage(selectedIndexes)
+        }
+        if (event.key == OmniKeys.KEY_DELETE) {
+            removeMessage(selectedIndexes)
+        }
+    }
+
+    @SubscribeEvent
+    fun onMouseRelease(event: ScreenEvent.MouseRelease.Post) {
+        if (event.screen !is ChatScreen) return
+        val isHovered = hoveredIndex != -1
+        if (!isHovered ) {
+            clearSelection()
+            return
+        }
+        when (event.button.code) {
+            0 -> {
+                if (!OmniKeyboard.isCtrlKeyPressed) selectedIndexes.clear()
+                when {
+                    OmniKeyboard.isAltKeyPressed -> {
+                        val hook = chatAccessor.trimmedMessages[hoveredIndex].asHook()
+                        selectedIndexes.addAll(hoveredIndex + hook.`chatting$getLeft`()..hoveredIndex + hook.`chatting$getRight`())
+                    }
+                    OmniKeyboard.isShiftKeyPressed -> {
+                        val start = minOf(lastSelected, hoveredIndex)
+                        val end = maxOf(lastSelected, hoveredIndex)
+                        selectedIndexes.addAll(start..end)
+                    }
+                    else -> selectedIndexes.add(hoveredIndex)
+                }
+                lastSelected = hoveredIndex
+                selectedIndexes = selectedIndexes.sortedDescending().toMutableSet()
+            }
+            1 -> copyMessage(
+                if (selectedIndexes.contains(hoveredIndex)) {
+                    selectedIndexes
+                } else {
+                    selectedIndexes.clear()
+                    mutableSetOf(hoveredIndex)
+                }
+            )
+        }
+        return
     }
 
     fun clearSelection() {
@@ -88,10 +107,22 @@ object ChatHandler {
 
     fun copyMessage(selection: MutableSet<Int>) {
         val text = selection.joinToString("\n") { index ->
-            getAllMessages()[index].content.asString()
+            chatAccessor.trimmedMessages[index].content.asString()
         }
         Clipboard.getInstance().string = text
-        Notifications.enqueue(Notifications.Type.Success, "Chatting", "Successfully copied \"$text\" to clipboard.")
+        /* notifications are broken */
+//        Notifications.enqueue(Notifications.Type.Success, "Chatting", "Successfully copied \"$text\" to clipboard.")
+    }
+
+    fun removeMessage(selection: MutableSet<Int>) {
+        val targets = selection.map {
+            chatAccessor.trimmedMessages[it].asHook().`chatting$getParent`()
+        }
+        chatAccessor.allMessages.removeIf {
+            targets.contains(it.hashCode())
+        }
+        chatAccessor.invokeRefreshTrimmedMessages()
+        clearSelection()
     }
 
     fun getEditorLines(): List<GuiMessage.Line> {

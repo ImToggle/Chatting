@@ -49,10 +49,6 @@ private val COLOR_MAP: Map<Int, Char> by lazy {
         .associate { it.color!! to it.char }
 }
 
-fun getAllMessages(): List<GuiMessage.Line> {
-    return chatAccessor.trimmedMessages
-}
-
 fun GuiMessage.Line.asHook() = this as Any as ChatLineHook
 
 val chatAccessor

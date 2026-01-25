@@ -12,6 +12,8 @@ public class ChatLineMixin implements ChatLineHook {
 
     @Unique int right = 0;
 
+    @Unique int parent = 0;
+
     @Override
     public void chatting$setLeft(int left) {
         this.left = left;
@@ -30,5 +32,15 @@ public class ChatLineMixin implements ChatLineHook {
     @Override
     public int chatting$getRight() {
         return this.right;
+    }
+
+    @Override
+    public void chatting$setParent(int parent) {
+        this.parent = parent;
+    }
+
+    @Override
+    public int chatting$getParent() {
+        return this.parent;
     }
 }

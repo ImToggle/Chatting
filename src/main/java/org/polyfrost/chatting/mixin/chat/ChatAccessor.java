@@ -2,7 +2,6 @@ package org.polyfrost.chatting.mixin.chat;
 
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
-import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -14,6 +13,12 @@ public interface ChatAccessor {
 
     @Accessor
     List<GuiMessage.Line> getTrimmedMessages();
+
+    @Accessor
+    List<GuiMessage> getAllMessages();
+
+    @Invoker
+    void invokeRefreshTrimmedMessages();
 
     @Invoker("getMessageLineIndexAt")
     int getIndexAt(double x, double y);
