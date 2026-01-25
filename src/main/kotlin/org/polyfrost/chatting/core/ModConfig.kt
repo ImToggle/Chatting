@@ -3,7 +3,6 @@ package org.polyfrost.chatting.core
 import org.polyfrost.chatting.ChattingConstants
 import org.polyfrost.oneconfig.api.config.v1.Config
 import org.polyfrost.oneconfig.api.config.v1.annotations.*
-import org.polyfrost.oneconfig.api.hypixel.v1.HypixelUtils
 import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import org.polyfrost.polyui.color.rgba
@@ -28,12 +27,6 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         min = 0f, max = 20f
     )
     var fadeTime = 10f
-
-    @Switch(
-        title = "Inform Outdated Mods", category = "General",
-        description = "Inform the user when a mod can be replaced by Chatting."
-    )
-    var informForAlternatives = true
 
     @Switch(
         title = "Chat Peek",
@@ -93,21 +86,6 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         description = "Disable smooth animations for edited messages."
     )
     var disableSmoothEdits = true
-
-    @Switch(
-        title = "Smooth Chat Background",
-        category = "Animations", subcategory = "Background",
-        description = "Smoothly animate chat background."
-    )
-    var smoothBG = true
-
-    @Slider(
-        title = "Background Animation Duration",
-        category = "Animations", subcategory = "Background",
-        min = 50f, max = 1000f,
-        description = "The speed at which chat background animate."
-    )
-    var bgDuration = 400f
 
     @Switch(
         title = "Smooth Chat Scrolling",
@@ -175,18 +153,6 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     var chatCopy = true
 
     @Switch(
-        title = "Right Click to Copy Chat Message", category = "Buttons",
-        description = "Enable right clicking on a chat message to copy it."
-    )
-    var rightClickCopy = false
-
-    @Switch(
-        title = "Only Click Copy Chat Message when Holding CTRL", category = "Buttons",
-        description = "Only allow right clicking on a chat message to copy it when holding CTRL."
-    )
-    var rightClickCopyCtrl = true
-
-    @Switch(
         title = "Delete Chat Message Button", category = "Buttons",
         description = "Enable deleting individual chat messages via a button."
     )
@@ -220,107 +186,13 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         description = "Offset all messages, even if a player has not been detected.",
         category = "Chat Heads"
     )
-    var offsetNonPlayerMessages = false
-
-    @Switch(
-        title = "Hide Chat Head on Consecutive Messages",
-        description = "Hide the chat head if the previous message was from the same player.",
-        category = "Chat Heads"
-    )
-    var hideChatHeadOnConsecutiveMessages = true
-
-    @Info(
-        title = "If Chatting detects a public chat message that seems like spam, and the probability is higher than this, it will hide it.",
-        category = "Player Chats",
-        description = ""
-    )
-    var ignored = false
-
-    @Info(
-        title = "Made for Hypixel Skyblock. Set to 100% to disable. 95% is a reasonable threshold to use it at. May not be accurate.",
-        category = "Player Chats",
-        description = ""
-    )
-    var ignored1 = false
-
-    @Slider(
-        min = 80F, max = 100F, title = "Spam Blocker Threshold", category = "Player Chats"
-    )
-    var spamThreshold = 100
-
-    @Switch(
-        title = "Custom SkyBlock Chat Formatting (remove ranks)", category = "Player Chats"
-    )
-    var customChatFormatting = false
-
-    @Switch(
-        title = "Completely Hide Spam", category = "Player Chats"
-    )
-    var hideSpam = false
+    var offsetAll = false
 
     @Dropdown(
         title = "Screenshot Mode", category = "Screenshotting", options = ["Save To System", "Add To Clipboard", "Both"],
         description = "What to do when taking a screenshot."
     )
-    var copyMode = 0
-
-    @Switch(
-        title = "Chat Tabs", category = "Tabs",
-        description = "Allow filtering chat messages by a tab."
-    )
-    var chatTabs = true
-        get() {
-            if (!field) return false
-            return if (hypixelOnlyChatTabs) {
-                HypixelUtils.isHypixel()
-            } else {
-                true
-            }
-        }
-
-    @Checkbox(
-        title = "Enable Tabs Only on Hypixel", category = "Tabs",
-        description = "Only enable chat tabs on Hypixel"
-    )
-    var hypixelOnlyChatTabs = true
-
-    @Info(
-        category = "Tabs",
-        title = "You can use the SHIFT key to select multiple tabs, as well as CTRL + TAB to switch to the next tab.",
-        description = ""
-    )
-    @Transient
-    var ignored2 = true
-
-    @Switch(
-        title = "Chat Shortcuts", category = "Shortcuts"
-    )
-    var chatShortcuts = false
-        get() {
-            if (!field) return false
-            return if (hypixelOnlyChatShortcuts) {
-                HypixelUtils.isHypixel()
-            } else {
-                true
-            }
-        }
-
-    @Checkbox(
-        title = "Enable Shortcuts Only on Hypixel", category = "Shortcuts"
-    )
-    var hypixelOnlyChatShortcuts = true
-
-    @Switch(
-        title = "Remove Tooltip Background", category = "Tooltips",
-        description = "Removes the background from tooltips."
-    )
-    var removeTooltipBackground = false
-
-    @Dropdown(
-        title = "Tooltip Text Render Type", category = "Tooltips", options = ["No Shadow", "Shadow", "Full Shadow"],
-        description = "The type of shadow to render on tooltips."
-    )
-    var tooltipTextRenderType = 1
+    var scMode = 0
 
     init {
         addCallback("chatPeek") {
