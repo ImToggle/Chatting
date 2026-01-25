@@ -42,7 +42,10 @@ object InputHandler {
         }
         if (event.modifiers.isCtrl) {
             when (event.key) {
-                OmniKeys.KEY_A -> if (hoveredIndex != -1) selectedIndexes.addAll(0 until messagesLength)
+                OmniKeys.KEY_A -> if (hoveredIndex != -1) {
+                    selectedIndexes.addAll(0 until messagesLength)
+                    selectedIndexes = selectedIndexes.sortedDescending().toMutableSet()
+                }
                 OmniKeys.KEY_C -> copyMessage(selectedIndexes)
                 OmniKeys.KEY_S -> ScreenshotHandler.screenshot(selectedIndexes)
             }

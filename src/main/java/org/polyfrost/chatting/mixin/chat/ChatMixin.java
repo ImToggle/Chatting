@@ -3,6 +3,7 @@ package org.polyfrost.chatting.mixin.chat;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.util.FormattedCharSequence;
 import org.polyfrost.chatting.core.InputHandler;
 import org.polyfrost.chatting.core.ModConfig;
@@ -104,11 +105,16 @@ public abstract class ChatMixin {
 
     @Unique boolean isFirst = false;
 
+    @Unique PlayerInfo lastSender = null;
+
     @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
     private void preAdd(GuiMessage guiMessage, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
         size = list.size();
         parent = guiMessage.hashCode();
         isFirst = ModConfig.INSTANCE.getShowChatHeads();
+        PlayerInfo sender = ((GuiMessageHook) (Object) guiMessage).chatting$getSender();
+        if (ModConfig.INSTANCE.getCompactHeads() && sender == lastSender) isFirst = false;
+        lastSender = sender;
         InputHandler.INSTANCE.shiftSelection(list.size());
     }
 
@@ -121,9 +127,10 @@ public abstract class ChatMixin {
         hook.chatting$setRight(index);
         hook.chatting$setParent(parent);
         if (isFirst) {
-            isFirst = false;
-            Util.injectHead(hook, ((GuiMessageHook) (Object) guiMessage).chatting$getSender());
+            hook.chatting$setSender(lastSender);
         }
+        hook.chatting$setShouldOffset(ModConfig.INSTANCE.getOffsetAll() || (lastSender != null && (isFirst || ModConfig.INSTANCE.getOffsetFull())));
+        isFirst = false;
     }
 
     @Inject(method = "clearMessages", at = @At("HEAD"))
@@ -134,5 +141,6 @@ public abstract class ChatMixin {
     @Inject(method = "refreshTrimmedMessages", at = @At("HEAD"))
     private void onRefresh(CallbackInfo ci) {
         InputHandler.INSTANCE.clearSelection();
+        lastSender = null;
     }
 }

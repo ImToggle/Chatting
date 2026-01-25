@@ -182,11 +182,26 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
     var showChatHeads = true
 
     @Switch(
-        title = "Offset Non-Player Messages",
+        title = "Compact Chat Heads", category = "Chat Heads",
+    )
+    var compactHeads = true
+        get() = showChatHeads && field
+
+    @Switch(
+        title = "Offset Full Message",
+        description = "Offset all lines.",
+        category = "Chat Heads"
+    )
+    var offsetFull = true
+        get() = showChatHeads && field
+
+    @Switch(
+        title = "Offset All Messages",
         description = "Offset all messages, even if a player has not been detected.",
         category = "Chat Heads"
     )
     var offsetAll = false
+        get() = showChatHeads && field
 
     @Dropdown(
         title = "Screenshot Mode", category = "Screenshotting", options = ["Save To System", "Add To Clipboard", "Both"],
@@ -198,8 +213,11 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         addCallback("chatPeek") {
             if (!chatPeek) peeking = false
         }
-        addCallback("showChatHeads") {
-            chatAccessor.invokeRefreshTrimmedMessages()
+        val chatHeads = listOf("showChatHeads", "compactHeads", "offsetFull", "offsetAll")
+        chatHeads.forEach {
+            addCallback(it) {
+                chatAccessor.invokeRefreshTrimmedMessages()
+            }
         }
         KeybindManager.registerKeybind(chatPeekBind)
     }

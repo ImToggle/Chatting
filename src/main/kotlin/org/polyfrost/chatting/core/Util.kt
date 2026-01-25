@@ -12,6 +12,7 @@ import dev.deftu.omnicore.api.client.screen.currentScreen
 import net.minecraft.ChatFormatting
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.screens.ChatScreen
+import net.minecraft.client.multiplayer.PlayerInfo
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.util.FormattedCharSequence
@@ -42,7 +43,7 @@ var peeking = false
 var gettingIndex = false
 
 @JvmField
-var currentGameProfile: GameProfile? = null
+var currentSender: PlayerInfo? = null
 
 @JvmField
 var shouldReduce = false
@@ -80,6 +81,8 @@ fun clamp(value: Double, min: Double, max: Double): Double {
     return if (value < min) min else min(value, max)
 }
 
+fun getPlayerInfo(gameProfile: GameProfile) = mc.connection?.getPlayerInfo(gameProfile.id)
+
 fun String.toChatLine(): GuiMessage {
     return GuiMessage(-1, Component.literal(this), null, null)
 }
@@ -92,13 +95,6 @@ fun GuiMessage.toLines(width: Int): List<GuiMessage.Line> {
     val list = net.minecraft.client.gui.components.ComponentRenderUtils.wrapComponents(this.content(), width, mc.font)
     return list.map { it ->
         GuiMessage.Line(this.addedTime, it, this.tag, it == list.last())
-    }
-}
-
-fun ChatLineHook.injectHead(profile: GameProfile?) {
-    val sender = profile ?: return
-    mc.connection?.getPlayerInfo(sender.id)?.let {
-        this.`chatting$setSender`(it)
     }
 }
 

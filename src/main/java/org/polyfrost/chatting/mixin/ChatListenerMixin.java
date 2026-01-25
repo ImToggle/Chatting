@@ -18,11 +18,11 @@ public class ChatListenerMixin {
 
     @Inject(method = "showMessageToPlayer", at = @At("HEAD"))
     public void captureGameProfile(ChatType.Bound bound, PlayerChatMessage playerChatMessage, Component component, GameProfile gameProfile, boolean bl, Instant instant, CallbackInfoReturnable<Boolean> cir) {
-        Util.currentGameProfile = gameProfile;
+        Util.currentSender = Util.getPlayerInfo(gameProfile);
     }
 
     @Inject(method = "showMessageToPlayer", at = @At("RETURN"))
     public void clearGameProfile(ChatType.Bound bound, PlayerChatMessage playerChatMessage, Component component, GameProfile gameProfile, boolean bl, Instant instant, CallbackInfoReturnable<Boolean> cir) {
-        Util.currentGameProfile = null;
+        Util.currentSender = null;
     }
 }

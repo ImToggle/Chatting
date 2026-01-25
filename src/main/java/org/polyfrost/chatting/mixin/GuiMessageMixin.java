@@ -1,7 +1,7 @@
 package org.polyfrost.chatting.mixin;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import org.polyfrost.chatting.hook.GuiMessageHook;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -9,15 +9,15 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(GuiMessage.class)
 public class GuiMessageMixin implements GuiMessageHook {
 
-    @Unique private GameProfile sender;
+    @Unique private PlayerInfo sender;
 
     @Override
-    public void chatting$setSender(GameProfile sender) {
+    public void chatting$setSender(PlayerInfo sender) {
         this.sender = sender;
     }
 
     @Override
-    public GameProfile chatting$getSender() {
+    public PlayerInfo chatting$getSender() {
         return this.sender;
     }
 

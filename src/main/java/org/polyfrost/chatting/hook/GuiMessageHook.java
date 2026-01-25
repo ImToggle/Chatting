@@ -1,11 +1,11 @@
 package org.polyfrost.chatting.hook;
 
-import com.mojang.authlib.GameProfile;
+import net.minecraft.client.multiplayer.PlayerInfo;
 
 public interface GuiMessageHook {
 
-    void chatting$setSender(GameProfile sender);
+    void chatting$setSender(PlayerInfo sender);
 
-    GameProfile chatting$getSender();
+    PlayerInfo chatting$getSender();
 
 }

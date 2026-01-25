@@ -1,6 +1,7 @@
 package org.polyfrost.chatting.mixin;
 
 import net.minecraft.client.StringSplitter;
+import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,7 +17,7 @@ public class StringSplitterMixin {
     )
     private int modifyWidth(int value) {
         if (Util.shouldReduce) {
-            Util.shouldReduce = false;
+            if (!ModConfig.INSTANCE.getOffsetFull() && !ModConfig.INSTANCE.getOffsetAll()) Util.shouldReduce = false;
             return value - 10;
         }
         return value;

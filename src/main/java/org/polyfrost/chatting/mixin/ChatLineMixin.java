@@ -17,6 +17,8 @@ public class ChatLineMixin implements ChatLineHook {
 
     @Unique PlayerInfo sender = null;
 
+    @Unique boolean shouldOffset = false;
+
     @Override
     public void chatting$setLeft(int left) {
         this.left = left;
@@ -55,6 +57,16 @@ public class ChatLineMixin implements ChatLineHook {
     @Override
     public PlayerInfo chatting$getSender() {
         return this.sender;
+    }
+
+    @Override
+    public void chatting$setShouldOffset(boolean shouldOffset) {
+        this.shouldOffset = shouldOffset;
+    }
+
+    @Override
+    public boolean chatting$getShouldOffset() {
+        return this.shouldOffset;
     }
 
 }

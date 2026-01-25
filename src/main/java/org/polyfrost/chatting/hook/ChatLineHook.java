@@ -20,6 +20,10 @@ public interface ChatLineHook {
 
     PlayerInfo chatting$getSender();
 
+    void chatting$setShouldOffset(boolean shouldOffset);
+
+    boolean chatting$getShouldOffset();
+
     default boolean hasHead() {
         return chatting$getSender() != null;
     }

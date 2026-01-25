@@ -12,7 +12,9 @@ import net.minecraft.client.gui.components.PlayerFaceRenderer;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.Util;
+import org.polyfrost.chatting.hook.ChatLineHook;
 import org.polyfrost.chatting.hook.GuiMessageHook;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,20 +36,18 @@ public class ChatMixin_ChatHead {
             at = @At("STORE"), ordinal = 0
     )
     private GuiMessage injectProfile(GuiMessage value) {
-        ((GuiMessageHook) (Object) value).chatting$setSender(Util.currentGameProfile);
+        ((GuiMessageHook) (Object) value).chatting$setSender(Util.currentSender);
         return value;
     }
 
     @Inject(method = "addMessageToDisplayQueue", at = @At("HEAD"))
     private void preSplit(GuiMessage guiMessage, CallbackInfo ci) {
-        if (((GuiMessageHook) (Object) guiMessage).chatting$getSender() != null) {
-            Util.shouldReduce = true;
-        }
+        Util.shouldReduce = ModConfig.INSTANCE.getOffsetAll() || ((GuiMessageHook) (Object) guiMessage).chatting$getSender() != null;
     }
 
     @ModifyArgs(method = "getClickedComponentStyleAt", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/StringSplitter;componentStyleAtWidth(Lnet/minecraft/util/FormattedCharSequence;I)Lnet/minecraft/network/chat/Style;"))
     private void spacing(Args args, @Local GuiMessage.Line line) {
-        if (Util.asHook(line).hasHead()) {
+        if (Util.asHook(line).chatting$getShouldOffset()) {
             args.set(1, (int) args.get(1) - 10);
         }
     }
@@ -55,7 +55,8 @@ public class ChatMixin_ChatHead {
     //#if MC >= 1.21.8
     @WrapOperation(method = "method_71991", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;III)V"))
     private void renderHead(GuiGraphics instance, Font font, FormattedCharSequence content, int x, int y, int color, Operation<Void> original, @Local(argsOnly = true) GuiMessage.Line line) {
-        PlayerInfo sender = Util.asHook(line).chatting$getSender();
+        ChatLineHook hook = Util.asHook(line);
+        PlayerInfo sender = hook.chatting$getSender();
         if (sender != null) {
             ResourceLocation texture =
                     //#if MC >= 1.21.10
@@ -64,14 +65,15 @@ public class ChatMixin_ChatHead {
                     //$$ sender.getSkin().texture();
                     //#endif
             PlayerFaceRenderer.draw(instance, texture, x, y, 8, sender.showHat(), false, color);
-            x += 10;
         }
+        if (hook.chatting$getShouldOffset()) x += 10;
         original.call(instance, font, content, x, y, color);
     }
     //#else
     //$$ @WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;III)I"))
     //$$ private int renderHead(GuiGraphics instance, Font font, FormattedCharSequence content, int x, int y, int color, Operation<Integer> original, @Local GuiMessage.Line line) {
-    //$$ PlayerInfo sender = Util.asHook(line).chatting$getSender();
+    //$$ ChatLineHook hook = Util.asHook(line);
+    //$$ PlayerInfo sender = hook.chatting$getSender();
     //$$ if (sender != null) {
             //#if MC > 1.21.1
             //$$ boolean showHat = sender.showHat();
@@ -84,7 +86,7 @@ public class ChatMixin_ChatHead {
         //$$ , color
         //#endif
     //$$ );
-    //$$ x += 10;
+    //$$ if (hook.chatting$getShouldOffset()) x += 10;
     //$$ }
     //$$ return original.call(instance, font, content, x, y, color);
     //$$ }
