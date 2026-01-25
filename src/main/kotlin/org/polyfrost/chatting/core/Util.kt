@@ -44,6 +44,9 @@ var gettingIndex = false
 @JvmField
 var currentGameProfile: GameProfile? = null
 
+@JvmField
+var shouldReduce = false
+
 val chatFocused
     get() = currentScreen is ChatScreen || peeking || HudManager.isEditing
 
@@ -89,6 +92,13 @@ fun GuiMessage.toLines(width: Int): List<GuiMessage.Line> {
     val list = net.minecraft.client.gui.components.ComponentRenderUtils.wrapComponents(this.content(), width, mc.font)
     return list.map { it ->
         GuiMessage.Line(this.addedTime, it, this.tag, it == list.last())
+    }
+}
+
+fun ChatLineHook.injectHead(profile: GameProfile?) {
+    val sender = profile ?: return
+    mc.connection?.getPlayerInfo(sender.id)?.let {
+        this.`chatting$setSender`(it)
     }
 }
 

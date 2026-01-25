@@ -8,6 +8,7 @@ import org.polyfrost.chatting.core.InputHandler;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.chatting.hook.ChatLineHook;
+import org.polyfrost.chatting.hook.GuiMessageHook;
 import org.polyfrost.polyui.color.PolyColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -101,21 +102,28 @@ public abstract class ChatMixin {
 
     @Unique int size = -1;
 
+    @Unique boolean isFirst = false;
+
     @Inject(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;isChatFocused()Z"))
     private void preAdd(GuiMessage guiMessage, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
         size = list.size();
         parent = guiMessage.hashCode();
+        isFirst = ModConfig.INSTANCE.getShowChatHeads();
         InputHandler.INSTANCE.shiftSelection(list.size());
     }
 
     @ModifyArgs(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V"))
-    private void onAdd(Args args, @Local(ordinal = 1) int index) {
+    private void onAdd(Args args, GuiMessage guiMessage, @Local(ordinal = 1) int index) {
         GuiMessage.Line chatLine = args.get(1);
         ChatLineHook hook = (ChatLineHook) (Object) chatLine;
         assert hook != null;
         hook.chatting$setLeft(index + 1 - size);
         hook.chatting$setRight(index);
         hook.chatting$setParent(parent);
+        if (isFirst) {
+            isFirst = false;
+            Util.injectHead(hook, ((GuiMessageHook) (Object) guiMessage).chatting$getSender());
+        }
     }
 
     @Inject(method = "clearMessages", at = @At("HEAD"))

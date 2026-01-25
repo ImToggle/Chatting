@@ -326,6 +326,9 @@ object ModConfig : Config("${ChattingConstants.MODID}.json", ChattingConstants.N
         addCallback("chatPeek") {
             if (!chatPeek) peeking = false
         }
+        addCallback("showChatHeads") {
+            chatAccessor.invokeRefreshTrimmedMessages()
+        }
         KeybindManager.registerKeybind(chatPeekBind)
     }
 

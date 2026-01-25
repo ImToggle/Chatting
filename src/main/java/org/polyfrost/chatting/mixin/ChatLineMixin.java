@@ -1,6 +1,7 @@
 package org.polyfrost.chatting.mixin;
 
 import net.minecraft.client.GuiMessage;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import org.polyfrost.chatting.hook.ChatLineHook;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -13,6 +14,8 @@ public class ChatLineMixin implements ChatLineHook {
     @Unique int right = 0;
 
     @Unique int parent = 0;
+
+    @Unique PlayerInfo sender = null;
 
     @Override
     public void chatting$setLeft(int left) {
@@ -43,4 +46,15 @@ public class ChatLineMixin implements ChatLineHook {
     public int chatting$getParent() {
         return this.parent;
     }
+
+    @Override
+    public void chatting$setSender(PlayerInfo sender) {
+        this.sender = sender;
+    }
+
+    @Override
+    public PlayerInfo chatting$getSender() {
+        return this.sender;
+    }
+
 }

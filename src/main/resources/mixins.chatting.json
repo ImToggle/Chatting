@@ -11,6 +11,7 @@
     "ChatListenerMixin",
     "GuiMessageMixin",
     "PeekScrollMixin",
+    "StringSplitterMixin",
     "chat.ChatAccessor",
     "chat.ChatMixin",
     "chat.ChatMixin_ChatHead",
