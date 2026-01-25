@@ -15,9 +15,6 @@ object InputHandler {
     var hoveredIndex = -1
 
     @JvmField
-    var hoveredIndexes: MutableSet<Int> = LinkedHashSet()
-
-    @JvmField
     var selectedIndexes: MutableSet<Int> = LinkedHashSet()
 
     var lastSelected = -1
@@ -46,15 +43,13 @@ object InputHandler {
         if (event.screen !is ChatScreen) return
     }
 
-    @SubscribeEvent
-    fun onMouseRelease(event: ScreenEvent.MouseRelease.Post) {
-        if (event.screen !is ChatScreen) return
+    fun onMouseRelease(mouseX: Double, mouseY: Double, mouseButton: Int) {
         val isHovered = hoveredIndex != -1
         if (!isHovered ) {
             clearSelection()
             return
         }
-        when (event.button.code) {
+        when (mouseButton) {
             0 -> {
                 if (!OmniKeyboard.isCtrlKeyPressed) selectedIndexes.clear()
                 when {
