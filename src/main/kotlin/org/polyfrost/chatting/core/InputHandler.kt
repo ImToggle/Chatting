@@ -17,6 +17,9 @@ object InputHandler {
     @JvmField
     var selectedIndexes: MutableSet<Int> = LinkedHashSet()
 
+    @JvmField
+    var functionalKeys = arrayListOf(OmniKeys.KEY_C, OmniKeys.KEY_S, OmniKeys.KEY_A).map { it.code }
+
     var lastSelected = -1
         get() = if (field == -1) messagesLength - 1 else field
 
@@ -24,17 +27,25 @@ object InputHandler {
         eventBus.register(this)
     }
 
+    fun shouldCancel(key: Int): Boolean {
+        if (selectedIndexes.isEmpty()) return false
+        if (key == OmniKeys.KEY_DELETE.code) return true
+        if (!OmniKeyboard.isCtrlKeyPressed) return false
+        return functionalKeys.contains(key)
+    }
+
     @SubscribeEvent
-    fun onKeyRelease(event: ScreenEvent.KeyRelease.Post) {
+    fun onKeyRelease(event: ScreenEvent.KeyPress.Post) {
         if (event.screen !is ChatScreen) return
-        if (hoveredIndex == -1) return
-        when (event.key) {
-            OmniKeys.KEY_DELETE -> removeMessage(selectedIndexes)
-            OmniKeys.KEY_C -> if (event.modifiers.isCtrl) copyMessage(selectedIndexes)
-            OmniKeys.KEY_S -> if (event.modifiers.isCtrl) ScreenshotHandler.screenshot(selectedIndexes)
-        }
         if (event.key == OmniKeys.KEY_DELETE) {
             removeMessage(selectedIndexes)
+        }
+        if (event.modifiers.isCtrl) {
+            when (event.key) {
+                OmniKeys.KEY_A -> if (hoveredIndex != -1) selectedIndexes.addAll(0 until messagesLength)
+                OmniKeys.KEY_C -> copyMessage(selectedIndexes)
+                OmniKeys.KEY_S -> ScreenshotHandler.screenshot(selectedIndexes)
+            }
         }
     }
 
