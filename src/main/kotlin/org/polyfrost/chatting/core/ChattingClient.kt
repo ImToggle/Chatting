@@ -10,6 +10,7 @@ object ChattingClient {
         ModConfig.preload()
         CommandManager.register(ModCommand)
         HudManager.register(MainChatHud())
+        ChatHandler.initialize()
     }
 
 }

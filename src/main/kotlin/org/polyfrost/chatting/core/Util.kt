@@ -50,10 +50,13 @@ private val COLOR_MAP: Map<Int, Char> by lazy {
 }
 
 fun getAllMessages(): List<GuiMessage.Line> {
-    return (mc.gui.chat as ChatAccessor).trimmedMessages
+    return chatAccessor.trimmedMessages
 }
 
 fun GuiMessage.Line.asHook() = this as Any as ChatLineHook
+
+val chatAccessor
+    get() = mc.gui.chat as ChatAccessor
 
 fun scrollChat(value: Double) {
     var amount = clamp(value, -1.0, 1.0)
@@ -65,8 +68,7 @@ fun scrollChat(value: Double) {
 
 fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY) {
     gettingIndex = true
-    val accessor = mc.gui.chat as ChatAccessor
-    McChat.hoveredIndex = accessor.getIndexAt(accessor.getChatX(x), accessor.getChatY(y))
+    ChatHandler.hoveredIndex = chatAccessor.getIndexAt(chatAccessor.getChatX(x), chatAccessor.getChatY(y))
     gettingIndex = false
 }
 

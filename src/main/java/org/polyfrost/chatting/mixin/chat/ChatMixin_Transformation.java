@@ -6,7 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ChatComponent;
-import org.polyfrost.chatting.core.McChat;
+import org.polyfrost.chatting.core.ChatHandler;
 import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.oneconfig.api.hud.v1.HudManager;
@@ -28,7 +28,7 @@ public class ChatMixin_Transformation {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void preRender(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
-        RenderUtil.recalculate(HudManager.isEditing() ? McChat.INSTANCE.getEditorLines() : this.trimmedMessages, this.chatScrollbarPos);
+        RenderUtil.recalculate(HudManager.isEditing() ? ChatHandler.INSTANCE.getEditorLines() : this.trimmedMessages, this.chatScrollbarPos);
         RenderUtil.push(guiGraphics);
         RenderUtil.translate(guiGraphics, RenderUtil.offsetX, RenderUtil.offsetY);
     }
