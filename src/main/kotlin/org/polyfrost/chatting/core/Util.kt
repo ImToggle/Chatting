@@ -2,6 +2,7 @@
 
 package org.polyfrost.chatting.core
 
+import com.mojang.authlib.GameProfile
 import dev.deftu.omnicore.api.client.chatHud
 import dev.deftu.omnicore.api.client.input.OmniKeyboard
 import dev.deftu.omnicore.api.client.input.OmniMouse
@@ -40,6 +41,9 @@ var peeking = false
 @JvmField
 var gettingIndex = false
 
+@JvmField
+var currentGameProfile: GameProfile? = null
+
 val chatFocused
     get() = currentScreen is ChatScreen || peeking || HudManager.isEditing
 
@@ -62,10 +66,11 @@ fun scrollChat(value: Double) {
     chatHud?.scrollChat(amount.toInt())
 }
 
-fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY) {
+fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaledY, ignoreX: Boolean = false): Int {
     gettingIndex = true
-    ChatHandler.hoveredIndex = chatAccessor.getIndexAt(chatAccessor.getChatX(x), chatAccessor.getChatY(y))
-    gettingIndex = false
+    return chatAccessor.getIndexAt(if (ignoreX) 0.0 else chatAccessor.getChatX(x), chatAccessor.getChatY(y)).also {
+        gettingIndex = false
+    }
 }
 
 fun clamp(value: Double, min: Double, max: Double): Double {

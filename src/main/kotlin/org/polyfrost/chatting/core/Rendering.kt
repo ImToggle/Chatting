@@ -40,7 +40,7 @@ fun recalculate(list: MutableList<GuiMessage.Line>, scrollPos: Int) {
     offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale * hudScale).toInt()
     chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale.toFloat() * mcScale
     chatHud.get().height = lineHeight * length * chatScale.toFloat() * mcScale
-    getSelectedIndex()
+    InputHandler.hoveredIndex = getSelectedIndex()
 }
 
 fun getWidth(): Int {

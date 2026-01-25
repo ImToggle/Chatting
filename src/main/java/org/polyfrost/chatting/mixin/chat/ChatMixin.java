@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.util.FormattedCharSequence;
-import org.polyfrost.chatting.core.ChatHandler;
+import org.polyfrost.chatting.core.InputHandler;
 import org.polyfrost.chatting.core.ModConfig;
 import org.polyfrost.chatting.core.Util;
 import org.polyfrost.chatting.hook.ChatLineHook;
@@ -53,7 +53,7 @@ public abstract class ChatMixin {
         lineIndex += chatScrollbarPos;
         if (Util.mainChatHud == null) return;
         int index = 4;
-        PolyColor bgColor = lineIndex == ChatHandler.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : ChatHandler.selectedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_selected() : Util.mainChatHud.getBgColor();
+        PolyColor bgColor = lineIndex == InputHandler.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : InputHandler.selectedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_selected() : Util.mainChatHud.getBgColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
@@ -105,7 +105,7 @@ public abstract class ChatMixin {
     private void preAdd(GuiMessage guiMessage, CallbackInfo ci, @Local List<FormattedCharSequence> list) {
         size = list.size();
         parent = guiMessage.hashCode();
-        ChatHandler.INSTANCE.shiftSelection(list.size());
+        InputHandler.INSTANCE.shiftSelection(list.size());
     }
 
     @ModifyArgs(method = "addMessageToDisplayQueue", at = @At(value = "INVOKE", target = "Ljava/util/List;add(ILjava/lang/Object;)V"))
@@ -120,11 +120,11 @@ public abstract class ChatMixin {
 
     @Inject(method = "clearMessages", at = @At("HEAD"))
     private void onClear(boolean bl, CallbackInfo ci) {
-        ChatHandler.INSTANCE.clearSelection();
+        InputHandler.INSTANCE.clearSelection();
     }
 
     @Inject(method = "refreshTrimmedMessages", at = @At("HEAD"))
     private void onRefresh(CallbackInfo ci) {
-        ChatHandler.INSTANCE.clearSelection();
+        InputHandler.INSTANCE.clearSelection();
     }
 }

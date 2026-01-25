@@ -11,6 +11,7 @@ object ChattingClient {
         CommandManager.register(ModCommand)
         HudManager.register(MainChatHud())
         ChatHandler.initialize()
+        InputHandler.initialize()
     }
 
 }
