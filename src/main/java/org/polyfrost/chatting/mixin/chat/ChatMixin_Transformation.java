@@ -1,7 +1,5 @@
 package org.polyfrost.chatting.mixin.chat;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.GuiGraphics;
@@ -46,11 +44,6 @@ public class ChatMixin_Transformation {
     @Inject(method = "getLinesPerPage", at = @At("HEAD"), cancellable = true)
     private void linesPerPage(CallbackInfoReturnable<Integer> cir) {
         cir.setReturnValue(RenderUtil.maxLength);
-    }
-
-    @WrapOperation(method = "getMessageLineIndexAt", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;getWidth()I"))
-    private int extraWidth(ChatComponent instance, Operation<Integer> original) {
-        return original.call(instance) + 8;
     }
 
 }

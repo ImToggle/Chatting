@@ -3,10 +3,14 @@
 package org.polyfrost.chatting.core
 
 import dev.deftu.omnicore.api.client.options.OmniChatSettings
+import dev.deftu.omnicore.api.client.render.OmniRenderingContext
 import dev.deftu.omnicore.api.client.render.OmniResolution
+import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipelines
+import dev.deftu.omnicore.api.color.OmniColor
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.GuiGraphics
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
+import org.polyfrost.polyui.unit.Vec2
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.min
@@ -29,18 +33,46 @@ var offsetY = 0
 
 var messagesLength = 0
 
-fun recalculate(list: MutableList<GuiMessage.Line>, scrollPos: Int) {
-    val chatHud = mainChatHud ?: return
+var chatX = 0
+
+var chatY = 0
+
+var chatEndX = 0
+
+var chatEndY = 0
+
+var scrollPos = 0
+
+fun recalculate(list: MutableList<GuiMessage.Line>, scroll: Int) {
+    val lastPos = messagesLength - scrollPos
+    if (list.size - scroll != lastPos) {
+        InputHandler.onScroll(list.size - scroll - lastPos, true)
+    }
+    if (scrollPos != scroll) {
+        val delta = scroll - scrollPos
+        scrollPos = scroll
+        InputHandler.onScroll(delta, false)
+    }
+
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
     val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
     maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
     messagesLength = list.size
     length = getVisibleLength(list, scrollPos)
-    offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
-    offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale * hudScale).toInt()
-    chatHud.get().width = (getWidth() + getExtraWidth()) * chatScale.toFloat() * mcScale
-    chatHud.get().height = lineHeight * length * chatScale.toFloat() * mcScale
-    InputHandler.hoveredIndex = getSelectedIndex()
+    offsetX = 0
+    offsetY = 0
+    val chatWidth = ((getWidth() + getExtraWidth()) * chatScale.toFloat()).toInt()
+    val chatHeight = (lineHeight * length * chatScale.toFloat()).toInt()
+    mainChatHud?.let { chatHud ->
+        offsetX = (chatHud.get().x / mcScale - getVanillaChatX()).toInt()
+        offsetY = (chatHud.get().y / mcScale).toInt() - getVanillaChatY() + (length * lineHeight * chatScale * hudScale).toInt()
+        chatHud.get().width = chatWidth * mcScale
+        chatHud.get().height = chatHeight * mcScale
+    }
+    chatX = getVanillaChatX() + offsetX
+    chatEndX = chatX + chatWidth
+    chatEndY = getVanillaChatY() + offsetY
+    chatY = chatEndY - chatHeight
 }
 
 fun getWidth(): Int {
@@ -51,8 +83,8 @@ fun getExtraWidth(): Int {
     return 12
 }
 
-fun getVanillaChatX(): Float {
-    return 0f
+fun getVanillaChatX(): Int {
+    return 0
 }
 
 fun getVanillaChatY(): Int {
@@ -121,4 +153,29 @@ fun GuiGraphics.scale(x: Float, y: Float) {
     //#else
     //$$ this.pose().scale(x, y, 1f)
     //#endif
+}
+
+fun OmniRenderingContext.renderQuad(
+    start: Vec2,
+    end: Vec2,
+    color: OmniColor
+) {
+    val buffer = OmniRenderPipelines.POSITION_COLOR.createBufferBuilder()
+    buffer
+        .vertex(pose, start.x.toDouble(), start.y.toDouble(), 0.0)
+        .color(color)
+        .next()
+    buffer
+        .vertex(pose, end.x.toDouble(), start.y.toDouble(), 0.0)
+        .color(color)
+        .next()
+    buffer
+        .vertex(pose, end.x.toDouble(), end.y.toDouble(), 0.0)
+        .color(color)
+        .next()
+    buffer
+        .vertex(pose, start.x.toDouble(), end.y.toDouble(), 0.0)
+        .color(color)
+        .next()
+    buffer.buildOrThrow().drawAndClose(OmniRenderPipelines.POSITION_COLOR)
 }

@@ -23,8 +23,11 @@ object ChatHandler {
     fun initialize() {
         ScreenEvents.AFTER_INIT.register { _, screen, _, _ ->
             if (screen !is ChatScreen) return@register
+            inChat = true
+            InputHandler.updateChatState()
             ScreenEvents.remove(screen).register { _ ->
-                InputHandler.clearSelection()
+                inChat = false
+                InputHandler.updateChatState()
             }
         }
     }

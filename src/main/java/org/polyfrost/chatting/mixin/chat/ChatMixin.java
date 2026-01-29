@@ -55,7 +55,7 @@ public abstract class ChatMixin {
         lineIndex += chatScrollbarPos;
         if (Util.mainChatHud == null) return;
         int index = 4;
-        PolyColor bgColor = lineIndex == InputHandler.hoveredIndex ? Util.mainChatHud.getBgColor_hovered() : InputHandler.selectedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_selected() : Util.mainChatHud.getBgColor();
+        PolyColor bgColor = InputHandler.highLightedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_hovered() : InputHandler.selectedIndexes.contains(lineIndex) ? Util.mainChatHud.getBgColor_selected() : Util.mainChatHud.getBgColor();
         int alpha = (int) (bgColor.alpha() * ((((int) args.get(index) >>  24) & 0xFF) / 127f));
         int color = (bgColor.getArgb() & 0x00FFFFFF) | (alpha << 24);
         args.set(index, color);
