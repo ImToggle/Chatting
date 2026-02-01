@@ -78,7 +78,7 @@ fun getSelectedIndex(x: Double = OmniMouse.scaledX, y: Double = OmniMouse.scaled
     if (!ignoreX && x !in chatX.toDouble()..chatEndX.toDouble()) return -1
     val mouseY = if (ignoreY) y.coerceIn(chatY.toDouble() + 0.0001..chatEndY.toDouble()) else y
     if (!ignoreY && mouseY !in chatY.toDouble()..chatEndY.toDouble()) return -1
-    val index = floor((chatEndY - mouseY) / (lineHeight * hudScale)).toInt() + scrollPos
+    val index = floor((chatEndY - mouseY) / (lineHeight * chatScale * hudScale)).toInt() + scrollPos
     if (index !in 0 until messagesLength) return -1
     return index
 }

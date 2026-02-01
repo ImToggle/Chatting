@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.GuiMessage;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ChatComponent;
+import org.polyfrost.chatting.animation.AnimationUtil;
 import org.polyfrost.chatting.core.ChatHandler;
 import org.polyfrost.chatting.core.RenderUtil;
 import org.polyfrost.chatting.core.Util;
@@ -26,6 +27,7 @@ public class ChatMixin_Transformation {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void preRender(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
+        RenderUtil.renderingChat = true;
         RenderUtil.recalculate(HudManager.isEditing() ? ChatHandler.INSTANCE.getEditorLines() : this.trimmedMessages, this.chatScrollbarPos);
         RenderUtil.push(guiGraphics);
         RenderUtil.translate(guiGraphics, RenderUtil.offsetX, RenderUtil.offsetY);
@@ -39,11 +41,32 @@ public class ChatMixin_Transformation {
     @Inject(method = "render", at = @At("RETURN"))
     private void postRender(CallbackInfo ci, @Local(argsOnly = true) GuiGraphics guiGraphics) {
         RenderUtil.pop(guiGraphics);
+        RenderUtil.renderingChat = false;
     }
 
     @Inject(method = "getLinesPerPage", at = @At("HEAD"), cancellable = true)
     private void linesPerPage(CallbackInfoReturnable<Integer> cir) {
         cir.setReturnValue(RenderUtil.maxLength);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;forEachLine(IIZILnet/minecraft/client/gui/components/ChatComponent$LineConsumer;)I", ordinal = 0))
+    private void preBackground(GuiGraphics guiGraphics, int i, int j, int k, boolean bl, CallbackInfo ci) {
+        RenderUtil.push(guiGraphics);
+        RenderUtil.pushScissor(guiGraphics);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;forEachLine(IIZILnet/minecraft/client/gui/components/ChatComponent$LineConsumer;)I", ordinal = 1))
+    private void preText(GuiGraphics guiGraphics, int i, int j, int k, boolean bl, CallbackInfo ci) {
+        RenderUtil.popScissor(guiGraphics);
+        RenderUtil.pop(guiGraphics);
+        RenderUtil.push(guiGraphics);
+        RenderUtil.pushScissor(guiGraphics);
+    }
+
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/components/ChatComponent;forEachLine(IIZILnet/minecraft/client/gui/components/ChatComponent$LineConsumer;)I", ordinal = 1, shift = At.Shift.AFTER))
+    private void postText(GuiGraphics guiGraphics, int i, int j, int k, boolean bl, CallbackInfo ci) {
+        RenderUtil.popScissor(guiGraphics);
+        RenderUtil.pop(guiGraphics);
     }
 
 }

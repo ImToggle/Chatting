@@ -9,6 +9,7 @@ import dev.deftu.omnicore.api.client.render.pipeline.OmniRenderPipelines
 import dev.deftu.omnicore.api.color.OmniColor
 import net.minecraft.client.GuiMessage
 import net.minecraft.client.gui.GuiGraphics
+import org.polyfrost.chatting.animation.AnimationUtil
 import org.polyfrost.oneconfig.utils.v1.dsl.mc
 import org.polyfrost.polyui.unit.Vec2
 import kotlin.math.ceil
@@ -17,13 +18,10 @@ import kotlin.math.min
 import kotlin.math.pow
 
 @JvmField
-var length = 0
+var renderingChat = false
 
 @JvmField
 var maxLength = 0
-
-@JvmField
-var lineHeight = 0
 
 @JvmField
 var offsetX = 0
@@ -31,7 +29,11 @@ var offsetX = 0
 @JvmField
 var offsetY = 0
 
+var length = 0
+
 var messagesLength = 0
+
+var lineHeight = 0
 
 var chatX = 0
 
@@ -43,17 +45,23 @@ var chatEndY = 0
 
 var scrollPos = 0
 
+var totalScroll = 0
+
 fun recalculate(list: MutableList<GuiMessage.Line>, scroll: Int) {
-    val lastPos = messagesLength - scrollPos
-    if (list.size - scroll != lastPos) {
-        InputHandler.onScroll(list.size - scroll - lastPos, true)
+    var delta = list.size - scroll - messagesLength + scrollPos
+    var scrolled = delta != 0
+    if (scrolled) {
+        totalScroll += delta
+//        println("animation scroll $delta $totalScroll")
+        InputHandler.onScroll(delta, true)
     }
-    if (scrollPos != scroll) {
-        val delta = scroll - scrollPos
+    delta = scroll - scrollPos
+    if (delta != 0) {
         scrollPos = scroll
         InputHandler.onScroll(delta, false)
+        scrolled = true
     }
-
+    if (scrolled) InputHandler.updateDragState()
     lineHeight = (9 * (1 + OmniChatSettings.chatLineSpacing)).toInt()
     val heightSettings = if (chatFocused) OmniChatSettings.chatHeightFocused else OmniChatSettings.chatHeightUnfocused
     maxLength = floor(20 + 160 * heightSettings).toInt() / lineHeight
@@ -83,15 +91,15 @@ fun getExtraWidth(): Int {
     return 12
 }
 
-fun getVanillaChatX(): Int {
+private fun getVanillaChatX(): Int {
     return 0
 }
 
-fun getVanillaChatY(): Int {
+private fun getVanillaChatY(): Int {
     return OmniResolution.scaledHeight - 40
 }
 
-fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
+private fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
     if (list.isEmpty()) return 0
     var length = 0
     val focused = chatFocused
@@ -107,7 +115,7 @@ fun getVisibleLength(list: MutableList<GuiMessage.Line>, scrollPos: Int): Int {
     }
 }
 
-fun GuiMessage.Line.canRender(focused: Boolean): Boolean {
+private fun GuiMessage.Line.canRender(focused: Boolean): Boolean {
     val age = mc.gui.guiTicks - this.addedTime
     val opacity = if (focused) {
         1f
@@ -153,6 +161,16 @@ fun GuiGraphics.scale(x: Float, y: Float) {
     //#else
     //$$ this.pose().scale(x, y, 1f)
     //#endif
+}
+
+fun GuiGraphics.pushScissor() {
+    if (AnimationUtil.chatAnimation.isFinished) return
+    this.enableScissor(-4, chatY - offsetY, chatEndX - chatX + 20, chatEndY - offsetY)
+}
+
+fun GuiGraphics.popScissor() {
+    if (AnimationUtil.chatAnimation.isFinished) return
+    this.disableScissor()
 }
 
 fun OmniRenderingContext.renderQuad(

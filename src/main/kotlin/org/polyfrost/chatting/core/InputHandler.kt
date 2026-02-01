@@ -15,6 +15,9 @@ import org.polyfrost.chatting.core.ChatHandler.copyMessage
 import org.polyfrost.chatting.core.ChatHandler.removeMessage
 import org.polyfrost.oneconfig.api.event.v1.events.MouseInputEvent
 import org.polyfrost.oneconfig.api.event.v1.invoke.EventHandler
+import org.polyfrost.oneconfig.api.ui.v1.keybind.KeybindManager
+import org.polyfrost.polyui.input.KeybindHelper
+import org.polyfrost.polyui.input.Keys
 import org.polyfrost.polyui.unit.Vec2
 import org.polyfrost.polyui.unit.by
 
@@ -29,7 +32,7 @@ object InputHandler {
     @JvmField
     var functionalKeys = arrayListOf(OmniKeys.KEY_C, OmniKeys.KEY_S, OmniKeys.KEY_A).map { it.code }
 
-    private var hoveredIndex = -1
+    var hoveredIndex = -1
         set(value) {
             field = value
             inBound = value != -1
@@ -65,6 +68,20 @@ object InputHandler {
 
     fun initialize() {
         eventBus.register(this)
+        // for debug purpose
+        KeybindManager.registerKeybind(
+            KeybindHelper.builder().keys(Keys.F9).does { down ->
+                if (!down) return@does
+                OmniClientChat.displayChatMessage("New Message")
+            }.build()
+        )
+        KeybindManager.registerKeybind(
+            KeybindHelper.builder().keys(Keys.F10).does { down ->
+                if (!down) return@does
+                OmniClientChat.displayChatMessage("New Message 1")
+                OmniClientChat.displayChatMessage("New Message 2")
+            }.build()
+        )
     }
 
     fun updateChatState() {
@@ -90,11 +107,6 @@ object InputHandler {
         when (event.key) {
             OmniKeys.KEY_DELETE -> removeMessage(selectedIndexes)
             OmniKeys.KEY_LEFT_ALT, OmniKeys.KEY_RIGHT_ALT -> updateHighLight(true)
-            OmniKeys.KEY_F9 -> OmniClientChat.displayChatMessage("New Message")
-            OmniKeys.KEY_F10 -> {
-                OmniClientChat.displayChatMessage("New Message 1")
-                OmniClientChat.displayChatMessage("New Message 2")
-            }
         }
         if (event.modifiers.isCtrl) {
             when (event.key) {
@@ -178,12 +190,10 @@ object InputHandler {
     fun onScroll(amount: Int, visual: Boolean) {
         if (visual) {
             if (!dragging) return
-            startPos = startPos.x by startPos.y - amount * lineHeight * hudScale * chatScale
+            startPos = startPos.x by startPos.y - amount * lineHeight * chatScale * hudScale
         } else {
             hoveredIndex = getSelectedIndex()
         }
-        dragStartIndex += amount
-        if (visual) lastDragIndex += amount
         updateDragState()
     }
 
@@ -196,7 +206,7 @@ object InputHandler {
         }
     }
 
-    private fun updateDragState() {
+    fun updateDragState() {
         if (!dragging) return
         val intersect = intersect(startPos, currentPos)
         if (lastOverlap != intersect) {
@@ -239,10 +249,12 @@ object InputHandler {
         if (!dragging) return
         val ctx = event.context
         ImmediateScreenRenderer.render(ctx) {
-            val extraHeight = lineHeight * hudScale * chatScale
+            ctx.pose.push()
+            val extraHeight = lineHeight * chatScale * hudScale
             ctx.withScissor(0, chatY - (extraHeight / 2f).toInt(), event.screen.width, chatEndY - chatY + extraHeight.toInt()) {
                 ctx.renderQuad(startPos, currentPos, dragColor)
             }
+            ctx.pose.pop()
         }
     }
 
@@ -252,20 +264,21 @@ object InputHandler {
 
     private fun updateSelection(index: Int, select: Boolean) {
         val state = if (OmniKeyboard.isCtrlKeyPressed) !selectedIndexes.contains(index) else select
-//        val currentState = selectedIndexes.contains(index)
-//        if (state != currentState) {
-//            println("set index $index to $state")
-//        }
         if (state) selectedIndexes.add(index) else selectedIndexes.remove(index)
     }
 
     fun clearSelection() {
         lastSelected = -1
         selectedIndexes.clear()
+        hoveredIndex = getSelectedIndex()
     }
 
     fun shiftSelection(amount: Int) {
         if (lastSelected != -1) lastSelected += amount
+        if (dragging) {
+            lastDragIndex += amount
+            dragStartIndex += amount
+        }
         selectedIndexes = selectedIndexes.mapTo(LinkedHashSet()) { it + amount }
         selectedIndexes.removeIf { it >= 100 }
     }
